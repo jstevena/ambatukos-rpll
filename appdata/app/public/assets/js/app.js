@@ -1,5 +1,26 @@
 (function () {
-  // Sidebar dapat dilipat pada tablet
+  var root = document.documentElement;
+
+  // ---- Tema: default mengikuti browser, tombol untuk mengganti (disimpan di localStorage) ----
+  function saved() { try { return localStorage.getItem('theme'); } catch (e) { return null; } }
+  function apply(t) { root.setAttribute('data-theme', t); }
+  var btn = document.getElementById('themeToggle');
+  if (btn) {
+    btn.addEventListener('click', function () {
+      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('theme', next); } catch (e) {}
+      apply(next);
+    });
+  }
+  // Selama belum memilih manual, ikuti perubahan tema sistem/browser secara langsung
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    var onChange = function (e) { if (!saved()) apply(e.matches ? 'dark' : 'light'); };
+    if (mq.addEventListener) mq.addEventListener('change', onChange);
+    else if (mq.addListener) mq.addListener(onChange);
+  }
+
+  // ---- Drawer menu pada tablet ----
   var t = document.getElementById('menuToggle');
   if (t) t.addEventListener('click', function () { document.body.classList.toggle('menu-open'); });
   document.addEventListener('click', function (e) {
@@ -8,14 +29,14 @@
     }
   });
 
-  // Konfirmasi pada aksi penting: <form data-confirm="Yakin?">
+  // ---- Konfirmasi aksi penting: <form data-confirm="Yakin?"> ----
   document.querySelectorAll('form[data-confirm]').forEach(function (f) {
     f.addEventListener('submit', function (e) {
       if (!window.confirm(f.getAttribute('data-confirm'))) e.preventDefault();
     });
   });
 
-  // Form pesan kamar: durasi aktif hanya untuk sewa sementara (BR-11)
+  // ---- Form pesan kamar: durasi aktif hanya untuk sewa sementara (BR-11) ----
   var radios = document.querySelectorAll('input[name="jenis_sewa"]');
   var durasi = document.getElementById('durasi_bulan');
   function syncDurasi() {
@@ -28,7 +49,7 @@
   radios.forEach(function (r) { r.addEventListener('change', syncDurasi); });
   syncDurasi();
 
-  // Tanggal kunjungan tidak boleh melewati tanggal masuk (BR-03)
+  // ---- Tanggal kunjungan <= tanggal masuk (BR-03) ----
   var kunj = document.getElementById('tanggal_kunjungan');
   var masuk = document.getElementById('tanggal_masuk');
   function syncTanggal() {

@@ -1,5 +1,5 @@
 <?php
-$warna = ['Tersedia' => '#2F6F5E', 'Dipesan' => '#E9A23B', 'Terisi' => '#9AA5A1'];
+$warna = ['Tersedia' => 'var(--ok)', 'Dipesan' => 'var(--warn)', 'Terisi' => 'var(--gray-dot)'];
 $tot = max(1, (int)$totalKamar);
 ?>
 <div class="stack" role="img" aria-label="Proporsi status kamar">
