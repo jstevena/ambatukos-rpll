@@ -48,7 +48,11 @@ final class Router
                 flash('error', $e->getMessage());
                 if ($method === 'POST') {
                     $old = $_POST;
-                    unset($old['password'], $old['password2'], $old['_csrf']);
+                    foreach (array_keys($old) as $k) {
+                        if (str_starts_with((string)$k, 'password') || $k === '_csrf') {
+                            unset($old[$k]); // jangan simpan password di sesi
+                        }
+                    }
                     $_SESSION['_old'] = $old;
                 }
                 header('Location: ' . $this->backUrl());

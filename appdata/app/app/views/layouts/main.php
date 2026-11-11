@@ -65,10 +65,10 @@ $inisial = $user ? mb_strtoupper(mb_substr($user['nama'], 0, 1)) : '';
           <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10.3 20a2 2 0 0 0 3.4 0"/></svg>
           <?php if ($notifCount > 0): ?><span class="dot"><?= (int)$notifCount ?></span><?php endif; ?>
         </a>
-        <div class="who" title="<?= e($peranLabel) ?>">
+        <a class="who" href="/akun" title="<?= e($peranLabel) ?> - ubah password" style="color:inherit;text-decoration:none">
           <span class="avatar"><?= e($inisial) ?></span>
           <b><?= e($user['nama']) ?></b>
-        </div>
+        </a>
         <form method="post" action="/logout">
           <?= csrf_field() ?>
           <button class="icon-btn" type="submit" aria-label="Keluar" title="Keluar">

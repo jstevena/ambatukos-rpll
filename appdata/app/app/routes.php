@@ -66,6 +66,10 @@ $r->get('/keluhan', [KeluhanController::class, 'index'], ['penyewa', 'admin']);
 $r->post('/keluhan', [KeluhanController::class, 'ajukan'], $P);
 $r->post('/keluhan/{id}/status', [KeluhanController::class, 'ubahStatus'], $A);
 
+// Akun saya (semua peran)
+$r->get('/akun', [AkunController::class, 'form'], $ALL);
+$r->post('/akun/password', [AkunController::class, 'ubahPassword'], $ALL);
+
 // Notifikasi
 $r->get('/notifikasi', [NotifikasiController::class, 'index'], $ALL);
 $r->post('/notifikasi/baca-semua', [NotifikasiController::class, 'bacaSemua'], $ALL);

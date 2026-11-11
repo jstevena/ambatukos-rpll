@@ -29,10 +29,7 @@ class AuthService
         if (!preg_match('/^[A-Za-z0-9_.]{4,50}$/', $username)) {
             throw new AppException('Username 4-50 karakter: huruf, angka, titik, atau garis bawah.');
         }
-        if (strlen($password) < 8 || strlen($password) > 72
-            || !preg_match('/[a-z]/', $password) || !preg_match('/[A-Z]/', $password) || !preg_match('/[0-9]/', $password)) {
-            throw new AppException('Password 8-72 karakter dan harus mengandung huruf besar, huruf kecil, dan angka.');
-        }
+        $this->pastikanPasswordKuat($password);
         if ($password !== (string)($in['password2'] ?? '')) {
             throw new AppException('Konfirmasi password tidak sama.');
         }
@@ -58,6 +55,32 @@ class AuthService
             }
             throw $e;
         }
+    }
+
+    /** Aturan password: 8-72 karakter, ada huruf besar, huruf kecil, dan angka. */
+    private function pastikanPasswordKuat(string $password): void
+    {
+        if (strlen($password) < 8 || strlen($password) > 72
+            || !preg_match('/[a-z]/', $password) || !preg_match('/[A-Z]/', $password) || !preg_match('/[0-9]/', $password)) {
+            throw new AppException('Password 8-72 karakter dan harus mengandung huruf besar, huruf kecil, dan angka.');
+        }
+    }
+
+    /** Ubah password sendiri (semua peran): wajib memasukkan password saat ini. */
+    public function ubahPassword(int $idPengguna, string $lama, string $baru, string $konfirmasi): void
+    {
+        $u = $this->repo->byId($idPengguna);
+        if ($u === null || !password_verify($lama, $u['password_hash'])) {
+            throw new AppException('Password saat ini salah.');
+        }
+        if ($baru !== $konfirmasi) {
+            throw new AppException('Konfirmasi password baru tidak sama.');
+        }
+        $this->pastikanPasswordKuat($baru);
+        if (hash_equals($lama, $baru)) {
+            throw new AppException('Password baru harus berbeda dari password saat ini.');
+        }
+        $this->repo->updatePassword($idPengguna, password_hash($baru, PASSWORD_DEFAULT));
     }
 
     /** UC-02 Login: verifikasi hash, cek status akun, kembalikan data pengguna. */
