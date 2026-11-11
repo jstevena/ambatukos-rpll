@@ -29,8 +29,9 @@ class AuthService
         if (!preg_match('/^[A-Za-z0-9_.]{4,50}$/', $username)) {
             throw new AppException('Username 4-50 karakter: huruf, angka, titik, atau garis bawah.');
         }
-        if (strlen($password) < 6) {
-            throw new AppException('Password minimal 6 karakter.');
+        if (strlen($password) < 8 || strlen($password) > 72
+            || !preg_match('/[a-z]/', $password) || !preg_match('/[A-Z]/', $password) || !preg_match('/[0-9]/', $password)) {
+            throw new AppException('Password 8-72 karakter dan harus mengandung huruf besar, huruf kecil, dan angka.');
         }
         if ($password !== (string)($in['password2'] ?? '')) {
             throw new AppException('Konfirmasi password tidak sama.');
