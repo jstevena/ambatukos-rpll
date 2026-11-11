@@ -21,6 +21,18 @@
       <?php if (!$bisaUsername): ?><p class="muted small" style="margin-bottom:0">Username tidak dapat diubah sendiri. Hubungi admin bila perlu menggantinya.</p><?php endif; ?>
     </div>
 
+    <?php if ($user['peran'] === 'penyewa' && !empty($googleAktif)): ?>
+    <div class="card">
+      <h2>Akun Google</h2>
+      <?php if ($google['terhubung']): ?>
+        <p style="margin:0">Terhubung dengan <strong><?= e($google['email']) ?></strong>. Anda dapat masuk dengan tombol <em>Masuk dengan Google</em>.</p>
+      <?php else: ?>
+        <p class="muted">Hubungkan akun Google agar bisa masuk tanpa perlu mengingat password.</p>
+        <a class="btn btn-outline" href="/auth/google?mode=tautkan">Hubungkan Google</a>
+      <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
     <?php if ($bisaUsername): ?>
     <div class="card">
       <h2>Ubah Username</h2>

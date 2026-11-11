@@ -83,6 +83,102 @@ class AuthService
         $this->repo->updatePassword($idPengguna, password_hash($baru, PASSWORD_DEFAULT));
     }
 
+    // ---------- Login Google ----------
+
+    public function cariDariGoogle(string $sub): ?array
+    {
+        $u = $this->repo->byGoogleId($sub);
+        if ($u !== null && $u['status_akun'] !== 'aktif') {
+            throw new AppException('Akun belum aktif. Hubungi pengelola kos.');
+        }
+        return $u;
+    }
+
+    public function emailTerpakai(string $email): bool
+    {
+        return $this->repo->byEmail($email) !== null;
+    }
+
+    public function infoGoogle(int $idPengguna): array
+    {
+        $u = $this->repo->byId($idPengguna);
+        return ['terhubung' => !empty($u['google_id']), 'email' => $u['email'] ?? null];
+    }
+
+    /** Hubungkan Google ke akun penyewa yang sedang login (pencocokan lewat google_id, bukan email). */
+    public function tautkanGoogle(int $idPengguna, string $sub, string $email): void
+    {
+        $u = $this->repo->byId($idPengguna);
+        if ($u === null || $u['peran'] !== 'penyewa') {
+            throw new AppException('Hanya akun penyewa yang dapat dihubungkan dengan Google.');
+        }
+        if (!empty($u['google_id'])) {
+            throw new AppException('Akun ini sudah terhubung dengan Google.');
+        }
+        $lain = $this->repo->byGoogleId($sub);
+        if ($lain !== null && (int)$lain['id_pengguna'] !== $idPengguna) {
+            throw new AppException('Akun Google ini sudah terhubung dengan akun lain.');
+        }
+        $emailLain = $this->repo->byEmail($email);
+        if ($emailLain !== null && (int)$emailLain['id_pengguna'] !== $idPengguna) {
+            throw new AppException('Email Google ini sudah dipakai akun lain.');
+        }
+        $this->repo->update($idPengguna, ['google_id' => $sub, 'email' => $email]);
+    }
+
+    /** Pendaftaran penyewa baru lewat Google; NIK, HP, dan alamat tetap wajib diisi. */
+    public function daftarDariGoogle(array $pending, array $in): array
+    {
+        $nama = trim((string)($in['nama'] ?? ''));
+        $noHp = preg_replace('/[\s-]/', '', (string)($in['no_hp'] ?? ''));
+        $nik = trim((string)($in['nik'] ?? ''));
+        $alamat = trim((string)($in['alamat'] ?? ''));
+        if ($nama === '' || $noHp === '' || $nik === '' || $alamat === '') {
+            throw new AppException('Semua kolom wajib diisi.');
+        }
+        if (mb_strlen($nama) > 100 || mb_strlen($alamat) > 255) {
+            throw new AppException('Nama maksimal 100 karakter dan alamat maksimal 255 karakter.');
+        }
+        if (!preg_match('/^[0-9+]{8,20}$/', $noHp)) {
+            throw new AppException('Nomor HP tidak valid.');
+        }
+        if (!preg_match('/^[0-9]{16}$/', $nik)) {
+            throw new AppException('NIK harus 16 digit angka.');
+        }
+        if ($this->repo->byGoogleId($pending['sub']) !== null || $this->repo->byEmail($pending['email']) !== null) {
+            throw new AppException('Akun Google ini sudah terdaftar. Silakan masuk dengan Google.');
+        }
+        try {
+            $id = $this->repo->create([
+                'nama' => $nama, 'username' => $this->usernameDariEmail($pending['email']),
+                'email' => $pending['email'], 'google_id' => $pending['sub'],
+                'password_hash' => password_hash(bin2hex(random_bytes(24)), PASSWORD_DEFAULT), // tidak dapat dipakai login
+                'no_hp' => $noHp, 'nik' => $nik, 'alamat' => $alamat,
+                'peran' => 'penyewa', 'status_akun' => 'aktif', 'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (PDOException $e) {
+            if ($e->getCode() === '23000') {
+                throw new AppException('Akun sudah terdaftar atau username bentrok. Silakan coba lagi.');
+            }
+            throw $e;
+        }
+        return $this->repo->byId($id);
+    }
+
+    private function usernameDariEmail(string $email): string
+    {
+        $base = preg_replace('/[^A-Za-z0-9_.]/', '', (string)strstr($email, '@', true));
+        if (strlen($base) < 4) {
+            $base .= 'user';
+        }
+        $base = substr($base, 0, 40);
+        $u = $base;
+        for ($i = 0; $i < 10 && $this->repo->byUsername($u) !== null; $i++) {
+            $u = $base . random_int(100, 9999);
+        }
+        return $u;
+    }
+
     public function validasiUsername(string $username): void
     {
         if (!preg_match('/^[A-Za-z0-9_.]{4,50}$/', $username)) {

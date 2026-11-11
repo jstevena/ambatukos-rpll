@@ -5,7 +5,10 @@ class AkunController extends Controller
 {
     public function form(): void
     {
-        $this->view('akun/password', ['title' => 'Akun Saya', 'user' => Auth::user()]);
+        $this->view('akun/password', [
+            'title' => 'Akun Saya', 'user' => Auth::user(),
+            'googleAktif' => GoogleAuthService::aktif(), 'google' => (new AuthService())->infoGoogle(Auth::id()),
+        ]);
     }
 
     public function ubahUsername(): void

@@ -15,7 +15,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             $this->redirect(Auth::home());
         }
-        $this->view('auth/login', ['title' => 'Masuk']);
+        $this->view('auth/login', ['title' => 'Masuk', 'googleAktif' => GoogleAuthService::aktif()]);
     }
 
     public function login(): void
@@ -31,7 +31,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             $this->redirect(Auth::home());
         }
-        $this->view('auth/register', ['title' => 'Daftar Akun']);
+        $this->view('auth/register', ['title' => 'Daftar Akun', 'googleAktif' => GoogleAuthService::aktif()]);
     }
 
     public function registrasi(): void

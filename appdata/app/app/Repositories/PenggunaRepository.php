@@ -8,6 +8,16 @@ class PenggunaRepository extends Repository
         return Database::one('SELECT * FROM pengguna WHERE username = ?', [$username]);
     }
 
+    public function byGoogleId(string $sub): ?array
+    {
+        return Database::one('SELECT * FROM pengguna WHERE google_id = ?', [$sub]);
+    }
+
+    public function byEmail(string $email): ?array
+    {
+        return Database::one('SELECT * FROM pengguna WHERE email = ?', [$email]);
+    }
+
     public function byId(int $id): ?array
     {
         return Database::one('SELECT * FROM pengguna WHERE id_pengguna = ?', [$id]);

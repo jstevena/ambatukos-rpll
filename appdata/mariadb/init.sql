@@ -8,6 +8,8 @@ CREATE TABLE pengguna (
   id_pengguna   INT AUTO_INCREMENT PRIMARY KEY,
   nama          VARCHAR(100) NOT NULL,
   username      VARCHAR(50)  NOT NULL,
+  email         VARCHAR(100) NULL,
+  google_id     VARCHAR(40)  NULL,
   password_hash VARCHAR(255) NOT NULL,
   no_hp         VARCHAR(20)  NULL,
   nik           VARCHAR(16)  NULL,
@@ -15,7 +17,9 @@ CREATE TABLE pengguna (
   peran         ENUM('penyewa','admin','pemilik') NOT NULL DEFAULT 'penyewa',
   status_akun   ENUM('aktif','nonaktif') NOT NULL DEFAULT 'aktif',
   created_at    DATETIME NOT NULL,
-  UNIQUE KEY uq_pengguna_username (username)
+  UNIQUE KEY uq_pengguna_username (username),
+  UNIQUE KEY uq_pengguna_email (email),
+  UNIQUE KEY uq_pengguna_google (google_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabel 5.6 kamar
