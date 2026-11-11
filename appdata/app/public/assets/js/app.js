@@ -20,6 +20,18 @@
     else if (mq.addListener) mq.addListener(onChange);
   }
 
+  // ---- Menu pil otomatis jadi drawer bila tidak muat di header ----
+  var inner = document.querySelector('.topbar-inner');
+  var pill = document.querySelector('.pillnav');
+  function cekMenu() {
+    if (!inner || !pill) return;
+    document.body.classList.remove('nav-collapsed');
+    if (inner.scrollWidth > inner.clientWidth + 1) document.body.classList.add('nav-collapsed');
+  }
+  cekMenu();
+  window.addEventListener('resize', cekMenu);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(cekMenu);
+
   // ---- Drawer menu pada tablet ----
   var t = document.getElementById('menuToggle');
   if (t) t.addEventListener('click', function () { document.body.classList.toggle('menu-open'); });

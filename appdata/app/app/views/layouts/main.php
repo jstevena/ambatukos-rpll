@@ -32,7 +32,7 @@ $inisial = $user ? mb_strtoupper(mb_substr($user['nama'], 0, 1)) : '';
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="/assets/css/app.css?v=2">
+  <link rel="stylesheet" href="/assets/css/app.css?v=3">
 </head>
 <body class="<?= $user ? 'has-shell' : 'guest' ?>">
 <header class="topbar">
@@ -65,11 +65,16 @@ $inisial = $user ? mb_strtoupper(mb_substr($user['nama'], 0, 1)) : '';
           <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10.3 20a2 2 0 0 0 3.4 0"/></svg>
           <?php if ($notifCount > 0): ?><span class="dot"><?= (int)$notifCount ?></span><?php endif; ?>
         </a>
-        <div class="who">
+        <div class="who" title="<?= e($peranLabel) ?>">
           <span class="avatar"><?= e($inisial) ?></span>
-          <div><b><?= e($user['nama']) ?></b><small><?= e($peranLabel) ?></small></div>
+          <b><?= e($user['nama']) ?></b>
         </div>
-        <form method="post" action="/logout"><?= csrf_field() ?><button class="btn btn-ghost btn-sm" type="submit">Keluar</button></form>
+        <form method="post" action="/logout">
+          <?= csrf_field() ?>
+          <button class="icon-btn" type="submit" aria-label="Keluar" title="Keluar">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          </button>
+        </form>
       <?php else: ?>
         <nav class="top-links">
           <a href="/kamar">Daftar Kamar</a>
@@ -102,6 +107,6 @@ $inisial = $user ? mb_strtoupper(mb_substr($user['nama'], 0, 1)) : '';
   <?php endforeach; ?>
   <?= $content ?>
 </main>
-<script src="/assets/js/app.js?v=2"></script>
+<script src="/assets/js/app.js?v=3"></script>
 </body>
 </html>
