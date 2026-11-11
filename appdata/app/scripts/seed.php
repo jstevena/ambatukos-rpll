@@ -39,11 +39,19 @@ $buat([
 ]);
 echo "[seed] akun pemilik & admin dibuat\n";
 
-if (strtolower((string)env('SEED_DEMO', 'true')) === 'true') {
+// SEED_PENYEWA & SEED_KAMAR mengatur data contoh secara terpisah.
+// Jika belum diisi, nilainya mengikuti SEED_DEMO (kompatibel dengan .env lama).
+$aktif = static fn(string $key): bool => strtolower((string)env($key, env('SEED_DEMO', 'true'))) === 'true';
+
+if ($aktif('SEED_PENYEWA')) {
     $buat([
         'nama' => 'Andi Pratama', 'username' => 'andi', 'password_hash' => password_hash(env('SEED_PENYEWA_PASSWORD', 'penyewa123'), PASSWORD_DEFAULT),
         'no_hp' => '081200000003', 'nik' => '3273010101010001', 'alamat' => 'Jl. Contoh No. 1, Bandung', 'peran' => 'penyewa',
     ]);
+    echo "[seed] penyewa demo (andi) dibuat\n";
+}
+
+if ($aktif('SEED_KAMAR')) {
     $kamar = new KamarRepository();
     $demo = [
         ['101', 9.00, 'Kasur, Lemari, Meja belajar, Kipas angin, Kamar mandi luar', 800000, 8800000, 'tetap'],
@@ -59,5 +67,5 @@ if (strtolower((string)env('SEED_DEMO', 'true')) === 'true') {
             'biaya_per_bulan' => $bulan, 'biaya_per_tahun' => $tahun, 'jenis_sewa' => $jenis, 'status' => 'Tersedia',
         ]);
     }
-    echo "[seed] penyewa demo (andi) dan 6 kamar contoh dibuat\n";
+    echo "[seed] 6 kamar contoh dibuat\n";
 }
