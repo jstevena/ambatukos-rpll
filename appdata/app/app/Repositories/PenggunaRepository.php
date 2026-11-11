@@ -29,12 +29,24 @@ class PenggunaRepository extends Repository
         return array_map('intval', array_column($rows, 'id_pengguna'));
     }
 
-    /** @return array{0: array, 1: int} */
+    /**
+     * Mantan penyewa: akun yang data pribadinya sudah dihapus, atau penyewa yang pernah menyewa sampai Selesai
+     * dan kini tidak memiliki pemesanan berjalan.
+     */
+    private const MANTAN = "(LEFT(username, 9) = 'terhapus_' OR (
+        EXISTS (SELECT 1 FROM pemesanan s WHERE s.id_penyewa = pengguna.id_pengguna AND s.status = 'Selesai')
+        AND NOT EXISTS (SELECT 1 FROM pemesanan b WHERE b.id_penyewa = pengguna.id_pengguna AND b.status IN ('Menunggu DP','Menunggu Pelunasan','Aktif'))))";
+
+    /** @return array{0: array, 1: int} $peran: penyewa | mantan | admin | pemilik | null (semua) */
     public function paginate(?string $peran, string $q, int $page, int $per): array
     {
         $where = [];
         $p = [];
-        if ($peran !== null) {
+        if ($peran === 'mantan') {
+            $where[] = "peran = 'penyewa' AND " . self::MANTAN;
+        } elseif ($peran === 'penyewa') {
+            $where[] = "peran = 'penyewa' AND NOT " . self::MANTAN;
+        } elseif ($peran !== null) {
             $where[] = 'peran = ?';
             $p[] = $peran;
         }
@@ -47,7 +59,9 @@ class PenggunaRepository extends Repository
         $total = (int)Database::val("SELECT COUNT(*) FROM pengguna $w", $p);
         $offset = max(0, ($page - 1) * $per);
         $rows = Database::all(
-            "SELECT id_pengguna, nama, username, no_hp, nik, peran, status_akun, created_at FROM pengguna $w
+            "SELECT id_pengguna, nama, username, no_hp, nik, peran, status_akun, created_at,
+                    (peran = 'penyewa' AND " . self::MANTAN . ") AS mantan
+               FROM pengguna $w
               ORDER BY FIELD(peran, 'admin', 'pemilik', 'penyewa'), nama LIMIT " . (int)$per . ' OFFSET ' . (int)$offset,
             $p
         );

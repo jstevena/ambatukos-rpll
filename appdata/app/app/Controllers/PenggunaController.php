@@ -23,7 +23,7 @@ class PenggunaController extends Controller
 
     public function hapus(string $id): void
     {
-        $r = $this->svc->hapus(Auth::id(), (int)$id);
+        $r = $this->svc->hapus(Auth::id(), (string)Auth::role(), (int)$id);
         flash('success', $r['anonim']
             ? 'Data pribadi "' . $r['nama'] . '" dihapus. Riwayat transaksinya disimpan tanpa identitas.'
             : 'Pengguna "' . $r['nama'] . '" dihapus.');
@@ -33,7 +33,7 @@ class PenggunaController extends Controller
     public function status(string $id): void
     {
         $status = $this->input('status');
-        $nama = $this->svc->ubahStatus(Auth::id(), (int)$id, $status);
+        $nama = $this->svc->ubahStatus(Auth::id(), (string)Auth::role(), (int)$id, $status);
         flash('success', 'Akun "' . $nama . '" ' . ($status === 'aktif' ? 'diaktifkan.' : 'dinonaktifkan. Pengguna tidak dapat masuk lagi.'));
         $this->redirect('/pengguna');
     }

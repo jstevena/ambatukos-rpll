@@ -1,6 +1,7 @@
 <?php
 $cur = $peran ?? '';
 $me = Auth::id();
+$myRole = Auth::role();
 $label = ['penyewa' => 'Penyewa', 'admin' => 'Admin', 'pemilik' => 'Pemilik Kos'];
 $warna = ['penyewa' => 'gray', 'admin' => 'info', 'pemilik' => 'ok'];
 $mask = static fn(?string $n): string => $n ? str_repeat('*', max(0, strlen($n) - 4)) . substr($n, -4) : '-';
@@ -15,7 +16,7 @@ $mask = static fn(?string $n): string => $n ? str_repeat('*', max(0, strlen($n) 
 </div>
 
 <div class="filter">
-  <?php foreach (['' => 'Semua', 'penyewa' => 'Penyewa', 'admin' => 'Admin', 'pemilik' => 'Pemilik Kos'] as $v => $l): ?>
+  <?php foreach (['' => 'Semua', 'penyewa' => 'Penyewa', 'mantan' => 'Mantan Penyewa', 'admin' => 'Admin', 'pemilik' => 'Pemilik Kos'] as $v => $l): ?>
     <a class="<?= $cur === $v ? 'active' : '' ?>" href="/pengguna?<?= e(http_build_query(array_filter(['peran' => $v, 'q' => $q]))) ?>"><?= e($l) ?></a>
   <?php endforeach; ?>
 </div>
@@ -28,11 +29,16 @@ $mask = static fn(?string $n): string => $n ? str_repeat('*', max(0, strlen($n) 
     <table class="table-cards">
       <thead><tr><th>Nama</th><th>Username</th><th>Peran</th><th>No. HP</th><th>NIK</th><th>Terdaftar</th><th>Status</th><th>Aksi</th></tr></thead>
       <tbody>
-      <?php foreach ($d['rows'] as $u): $self = (int)$u['id_pengguna'] === $me; ?>
+      <?php foreach ($d['rows'] as $u):
+          $self = (int)$u['id_pengguna'] === $me;
+          $mantan = (int)$u['mantan'] === 1;
+          $anonim = str_starts_with((string)$u['username'], 'terhapus_');
+          $terkunci = $myRole === 'admin' && $u['peran'] === 'pemilik'; // admin tidak boleh mengelola pemilik
+      ?>
         <tr>
           <td data-label="Nama"><strong><?= e($u['nama']) ?></strong></td>
           <td data-label="Username"><?= e($u['username']) ?></td>
-          <td data-label="Peran"><?= badge($label[$u['peran']] ?? $u['peran'], $warna[$u['peran']] ?? 'gray') ?></td>
+          <td data-label="Peran"><?= $mantan ? badge('Mantan Penyewa', 'gray') : badge($label[$u['peran']] ?? $u['peran'], $warna[$u['peran']] ?? 'gray') ?></td>
           <td data-label="No. HP"><?= e($u['no_hp'] ?: '-') ?></td>
           <td data-label="NIK"><?= e($mask($u['nik'])) ?></td>
           <td data-label="Terdaftar"><?= e(tgl($u['created_at'])) ?></td>
@@ -40,6 +46,10 @@ $mask = static fn(?string $n): string => $n ? str_repeat('*', max(0, strlen($n) 
           <td data-label="Aksi">
             <?php if ($self): ?>
               <span class="muted small">Akun Anda</span>
+            <?php elseif ($terkunci): ?>
+              <span class="muted small">Hanya dapat dikelola pemilik</span>
+            <?php elseif ($anonim): ?>
+              <span class="muted small">Data pribadi sudah dihapus</span>
             <?php else: ?>
               <div class="row-actions">
                 <form method="post" action="/pengguna/<?= (int)$u['id_pengguna'] ?>/status">

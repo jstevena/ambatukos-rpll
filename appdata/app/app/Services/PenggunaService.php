@@ -13,9 +13,17 @@ class PenggunaService
         $this->repo = new PenggunaRepository();
     }
 
+    /** Akun pemilik kos hanya dapat dikelola oleh pemilik kos sendiri. */
+    private function pastikanBolehMengelola(string $peranAktor, array $target): void
+    {
+        if ($peranAktor === 'admin' && $target['peran'] === 'pemilik') {
+            throw new AppException('Admin tidak dapat menonaktifkan atau menghapus akun pemilik kos.');
+        }
+    }
+
     public function daftar(?string $peran, string $q, int $page): array
     {
-        if (!in_array($peran, ['penyewa', 'admin', 'pemilik'], true)) {
+        if (!in_array($peran, ['penyewa', 'mantan', 'admin', 'pemilik'], true)) {
             $peran = null;
         }
         [$rows, $total] = $this->repo->paginate($peran, trim($q), $page, self::PER_HALAMAN);
@@ -23,7 +31,7 @@ class PenggunaService
     }
 
     /** @return array{nama: string, anonim: bool} anonim = true bila hanya data pribadi yang dihapus */
-    public function hapus(int $idAktor, int $id): array
+    public function hapus(int $idAktor, string $peranAktor, int $id): array
     {
         if ($id === $idAktor) {
             throw new AppException('Anda tidak dapat menghapus akun Anda sendiri.');
@@ -32,6 +40,7 @@ class PenggunaService
         if ($u === null) {
             throw new AppException('Pengguna tidak ditemukan.');
         }
+        $this->pastikanBolehMengelola($peranAktor, $u);
         if (in_array($u['peran'], ['admin', 'pemilik'], true) && $this->repo->countByPeran($u['peran']) <= 1) {
             throw new AppException('Tidak dapat menghapus satu-satunya akun ' . $u['peran'] . '.');
         }
@@ -60,7 +69,7 @@ class PenggunaService
         return ['nama' => $u['nama'], 'anonim' => true];
     }
 
-    public function ubahStatus(int $idAktor, int $id, string $status): string
+    public function ubahStatus(int $idAktor, string $peranAktor, int $id, string $status): string
     {
         if (!in_array($status, ['aktif', 'nonaktif'], true)) {
             throw new AppException('Status tidak valid.');
@@ -72,6 +81,7 @@ class PenggunaService
         if ($u === null) {
             throw new AppException('Pengguna tidak ditemukan.');
         }
+        $this->pastikanBolehMengelola($peranAktor, $u);
         if ($status === 'nonaktif' && in_array($u['peran'], ['admin', 'pemilik'], true)
             && $u['status_akun'] === 'aktif' && $this->repo->countByPeran($u['peran'], true) <= 1) {
             throw new AppException('Tidak dapat menonaktifkan satu-satunya akun ' . $u['peran'] . ' yang aktif.');
