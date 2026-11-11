@@ -233,3 +233,15 @@ td.num,th.num{text-align:right}
   .table-wrap{overflow:visible}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none !important}}
+
+/* ---------- Performa layar sentuh/tablet: tanpa blur berat agar scroll mulus ---------- */
+@media (max-width:1100px), (pointer:coarse){
+  :root{--surface:rgba(255,255,255,.92);--surface-2:rgba(255,255,255,.62)}
+  [data-theme="dark"]{--surface:rgba(32,29,50,.94);--surface-2:rgba(255,255,255,.06)}
+  .topbar,.bottombar,.sidebar,.card,.stat,.room-card,.filter a,.room-photo .badge{-webkit-backdrop-filter:none;backdrop-filter:none}
+  .topbar,.bottombar,.sidebar,.card,.stat,.room-card{box-shadow:0 2px 10px rgba(40,30,90,.10)}
+  [data-theme="dark"] .topbar,[data-theme="dark"] .bottombar,[data-theme="dark"] .sidebar,[data-theme="dark"] .card,[data-theme="dark"] .stat,[data-theme="dark"] .room-card{box-shadow:0 2px 10px rgba(0,0,0,.35)}
+  body::before{transform:translateZ(0)}
+  .room-card{content-visibility:auto;contain-intrinsic-size:auto 330px}
+  .stat,.room-card,.btn{transition:none}
+}
