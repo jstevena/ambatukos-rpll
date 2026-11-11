@@ -52,7 +52,7 @@ services:
       ambatukos-db:
         condition: service_healthy
     ports:
-      - "${BIND_IP:-172.20.0.1}:${APP_PORT:-8079}:80" # Bind ke IP Gateway
+      - "${BIND_IP:-172.30.0.1}:${APP_PORT:-8079}:80" # Bind ke IP Gateway
     volumes:
       - ./appdata/app:/var/www/html
 
@@ -83,4 +83,4 @@ networks:
     name: ambatukos
     ipam:
       config:
-        - subnet: 172.20.0.0/16
+       - subnet: ${NET_SUBNET:-172.30.0.0/16}
