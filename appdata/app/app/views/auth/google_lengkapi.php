@@ -19,10 +19,6 @@
       <input type="text" id="nik" name="nik" inputmode="numeric" maxlength="16" value="<?= e(old('nik')) ?>" required>
       <div class="hint" id="hNik">16 digit angka sesuai KTP.</div>
     </div>
-    <div class="field">
-      <label for="alamat">Alamat</label>
-      <input type="text" id="alamat" name="alamat" maxlength="255" value="<?= e(old('alamat')) ?>" required>
-    </div>
     <button class="btn" type="submit" style="width:100%">Selesaikan Pendaftaran</button>
   </form>
   <p class="small" style="margin-top:14px"><a href="/daftar">Batal</a></p>

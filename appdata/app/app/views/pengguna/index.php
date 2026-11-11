@@ -63,7 +63,7 @@ $warna = ['penyewa' => 'gray', 'admin' => 'info', 'pemilik' => 'ok'];
                   <button class="btn btn-outline btn-sm" type="submit"><?= $u['status_akun'] === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' ?></button>
                 </form>
                 <form method="post" action="/pengguna/<?= (int)$u['id_pengguna'] ?>/hapus" data-confirm="<?= $u['peran'] === 'penyewa'
-                    ? 'Hapus ' . e($u['nama']) . '? Jika sudah punya riwayat transaksi, data pribadinya (nama, NIK, HP, alamat) dihapus dan riwayat disimpan tanpa identitas. Tidak dapat dibatalkan.'
+                    ? 'Hapus ' . e($u['nama']) . '? Jika sudah punya riwayat transaksi, data pribadinya (nama, NIK, HP) dihapus dan riwayat disimpan tanpa identitas. Tidak dapat dibatalkan.'
                     : 'Hapus pengguna ' . e($u['nama']) . '? Tindakan ini tidak dapat dibatalkan.' ?>">
                   <?= csrf_field() ?><button class="btn btn-danger btn-sm" type="submit">Hapus</button>
                 </form>

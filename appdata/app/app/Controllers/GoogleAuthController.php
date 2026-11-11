@@ -62,7 +62,7 @@ class GoogleAuthController extends Controller
         }
     }
 
-    /** Halaman melengkapi data (NIK, HP, alamat) setelah autentikasi Google. */
+    /** Halaman melengkapi data (NIK dan HP) setelah autentikasi Google. */
     public function formLengkapi(): void
     {
         $this->view('auth/google_lengkapi', ['title' => 'Lengkapi Data', 'p' => $this->pending()]);

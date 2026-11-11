@@ -37,10 +37,6 @@
       <input type="text" id="nik" name="nik" inputmode="numeric" maxlength="16" value="<?= e(old('nik')) ?>" required>
       <div class="hint" id="hNik">16 digit angka sesuai KTP.</div>
     </div>
-    <div class="field">
-      <label for="alamat">Alamat</label>
-      <input type="text" id="alamat" name="alamat" maxlength="255" value="<?= e(old('alamat')) ?>" required>
-    </div>
     <div class="cols-2">
       <div class="field">
         <label for="password">Password</label>

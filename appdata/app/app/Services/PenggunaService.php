@@ -41,16 +41,15 @@ class PenggunaService
         $password = (string)($in['password'] ?? '');
         $noHp = preg_replace('/[\s-]/', '', (string)($in['no_hp'] ?? ''));
         $nik = trim((string)($in['nik'] ?? ''));
-        $alamat = trim((string)($in['alamat'] ?? ''));
 
         if ($nama === '' || $username === '' || $password === '') {
             throw new AppException('Nama, username, dan password wajib diisi.');
         }
-        if ($peran === 'penyewa' && ($noHp === '' || $nik === '' || $alamat === '')) {
-            throw new AppException('Untuk akun penyewa, nomor HP, NIK, dan alamat wajib diisi.');
+        if ($peran === 'penyewa' && ($noHp === '' || $nik === '')) {
+            throw new AppException('Untuk akun penyewa, nomor HP dan NIK wajib diisi.');
         }
-        if (mb_strlen($nama) > 100 || mb_strlen($alamat) > 255) {
-            throw new AppException('Nama maksimal 100 karakter dan alamat maksimal 255 karakter.');
+        if (mb_strlen($nama) > 100) {
+            throw new AppException('Nama maksimal 100 karakter.');
         }
         $this->auth->validasiUsername($username);
         $this->auth->pastikanPasswordKuat($password);
@@ -69,7 +68,7 @@ class PenggunaService
         try {
             $this->repo->create([
                 'nama' => $nama, 'username' => $username, 'password_hash' => password_hash($password, PASSWORD_DEFAULT),
-                'no_hp' => $noHp !== '' ? $noHp : null, 'nik' => $nik !== '' ? $nik : null, 'alamat' => $alamat !== '' ? $alamat : null,
+                'no_hp' => $noHp !== '' ? $noHp : null, 'nik' => $nik !== '' ? $nik : null,
                 'peran' => $peran, 'status_akun' => 'aktif', 'created_at' => date('Y-m-d H:i:s'),
             ]);
         } catch (PDOException $e) {

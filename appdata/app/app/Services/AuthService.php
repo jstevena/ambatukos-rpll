@@ -18,13 +18,12 @@ class AuthService
         $password = (string)($in['password'] ?? '');
         $noHp = preg_replace('/[\s-]/', '', (string)($in['no_hp'] ?? ''));
         $nik = trim((string)($in['nik'] ?? ''));
-        $alamat = trim((string)($in['alamat'] ?? ''));
 
-        if ($nama === '' || $username === '' || $password === '' || $noHp === '' || $nik === '' || $alamat === '') {
+        if ($nama === '' || $username === '' || $password === '' || $noHp === '' || $nik === '') {
             throw new AppException('Semua kolom wajib diisi.');
         }
-        if (mb_strlen($nama) > 100 || mb_strlen($alamat) > 255) {
-            throw new AppException('Nama maksimal 100 karakter dan alamat maksimal 255 karakter.');
+        if (mb_strlen($nama) > 100) {
+            throw new AppException('Nama maksimal 100 karakter.');
         }
         if (!preg_match('/^[A-Za-z0-9_.]{4,50}$/', $username)) {
             throw new AppException('Username 4-50 karakter: huruf, angka, titik, atau garis bawah.');
@@ -46,7 +45,7 @@ class AuthService
             return $this->repo->create([
                 'nama' => $nama, 'username' => $username,
                 'password_hash' => password_hash($password, PASSWORD_DEFAULT),
-                'no_hp' => $noHp, 'nik' => $nik, 'alamat' => $alamat,
+                'no_hp' => $noHp, 'nik' => $nik,
                 'peran' => 'penyewa', 'status_akun' => 'aktif', 'created_at' => date('Y-m-d H:i:s'),
             ]);
         } catch (PDOException $e) {
@@ -126,18 +125,17 @@ class AuthService
         $this->repo->update($idPengguna, ['google_id' => $sub, 'email' => $email]);
     }
 
-    /** Pendaftaran penyewa baru lewat Google; NIK, HP, dan alamat tetap wajib diisi. */
+    /** Pendaftaran penyewa baru lewat Google; NIK dan nomor HP tetap wajib diisi. */
     public function daftarDariGoogle(array $pending, array $in): array
     {
         $nama = trim((string)($in['nama'] ?? ''));
         $noHp = preg_replace('/[\s-]/', '', (string)($in['no_hp'] ?? ''));
         $nik = trim((string)($in['nik'] ?? ''));
-        $alamat = trim((string)($in['alamat'] ?? ''));
-        if ($nama === '' || $noHp === '' || $nik === '' || $alamat === '') {
+        if ($nama === '' || $noHp === '' || $nik === '') {
             throw new AppException('Semua kolom wajib diisi.');
         }
-        if (mb_strlen($nama) > 100 || mb_strlen($alamat) > 255) {
-            throw new AppException('Nama maksimal 100 karakter dan alamat maksimal 255 karakter.');
+        if (mb_strlen($nama) > 100) {
+            throw new AppException('Nama maksimal 100 karakter.');
         }
         if (!preg_match('/^[0-9+]{8,20}$/', $noHp)) {
             throw new AppException('Nomor HP tidak valid.');
@@ -153,7 +151,7 @@ class AuthService
                 'nama' => $nama, 'username' => $this->usernameDariEmail($pending['email']),
                 'email' => $pending['email'], 'google_id' => $pending['sub'],
                 'password_hash' => password_hash(bin2hex(random_bytes(24)), PASSWORD_DEFAULT), // tidak dapat dipakai login
-                'no_hp' => $noHp, 'nik' => $nik, 'alamat' => $alamat,
+                'no_hp' => $noHp, 'nik' => $nik,
                 'peran' => 'penyewa', 'status_akun' => 'aktif', 'created_at' => date('Y-m-d H:i:s'),
             ]);
         } catch (PDOException $e) {

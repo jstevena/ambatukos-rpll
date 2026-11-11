@@ -39,10 +39,6 @@
       <input type="text" id="nik" name="nik" inputmode="numeric" maxlength="16" value="<?= e(old('nik')) ?>">
       <div class="hint" id="hNik">16 digit angka sesuai KTP.</div>
     </div>
-    <div class="field">
-      <label for="alamat">Alamat <small class="req-penyewa">(wajib untuk penyewa)</small></label>
-      <input type="text" id="alamat" name="alamat" maxlength="255" value="<?= e(old('alamat')) ?>">
-    </div>
     <div class="cols-2">
       <div class="field">
         <label for="password">Password</label>
@@ -70,7 +66,7 @@
 <script>
 (function () {
   var peran = document.getElementById('peran'), u = document.getElementById('username'), n = document.getElementById('nik');
-  var hp = document.getElementById('no_hp'), al = document.getElementById('alamat');
+  var hp = document.getElementById('no_hp');
   var p = document.getElementById('password'), p2 = document.getElementById('password2');
   var hU = document.getElementById('hUser'), hN = document.getElementById('hNik'), hP2 = document.getElementById('hPw2');
   var rules = document.querySelectorAll('#pwRules li');
@@ -79,7 +75,7 @@
 
   function syncPeran() {
     var wajib = peran.value === 'penyewa';
-    [hp, n, al].forEach(function (el) { el.required = wajib; });
+    [hp, n].forEach(function (el) { el.required = wajib; });
     document.querySelectorAll('.req-penyewa').forEach(function (s) { s.style.display = wajib ? '' : 'none'; });
   }
   function cekUser() {
