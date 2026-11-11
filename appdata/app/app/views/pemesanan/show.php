@@ -17,6 +17,10 @@
   </dl>
 </div>
 
+<?php if ($p['status'] === 'Menunggu Pelunasan'): ?>
+  <div class="alert alert-info"><strong>Penting:</strong> saat kunjungan, jika kamar sudah sesuai dan Anda setuju (OK), serahkan <strong>fotokopi KTP</strong> kepada pengelola kos sebelum melunasi pembayaran.</div>
+<?php endif; ?>
+
 <div class="card">
   <h2>Tagihan</h2>
   <div class="table-wrap">

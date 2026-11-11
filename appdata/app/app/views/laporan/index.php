@@ -2,7 +2,7 @@
   <div><h1>Laporan Pendapatan</h1><p class="muted" style="margin:0">Dihitung dari pembayaran berstatus Disetujui.</p></div>
   <form method="get" action="/laporan" class="btn-row">
     <input type="month" name="periode" value="<?= e($periode) ?>" style="width:auto" onchange="this.form.submit()">
-    <?php if (Auth::role() === 'admin'): ?><a class="btn btn-outline" href="/laporan/unduh?periode=<?= e($periode) ?>">Unduh CSV</a><?php endif; ?>
+    <a class="btn" href="/laporan/unduh?periode=<?= e($periode) ?>">Unduh CSV</a>
   </form>
 </div>
 

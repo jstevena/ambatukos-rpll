@@ -7,10 +7,12 @@ class PenggunaService
     public const PER_HALAMAN = 12;
 
     private PenggunaRepository $repo;
+    private AuthService $auth;
 
     public function __construct()
     {
         $this->repo = new PenggunaRepository();
+        $this->auth = new AuthService();
     }
 
     /** Akun pemilik kos hanya dapat dikelola oleh pemilik kos sendiri. */
@@ -19,6 +21,103 @@ class PenggunaService
         if ($peranAktor === 'admin' && $target['peran'] === 'pemilik') {
             throw new AppException('Admin tidak dapat menonaktifkan atau menghapus akun pemilik kos.');
         }
+    }
+
+    /** Peran yang boleh dibuat: admin -> penyewa; pemilik -> penyewa & admin. */
+    public function peranBolehDibuat(string $peranAktor): array
+    {
+        return $peranAktor === 'pemilik' ? ['penyewa' => 'Penyewa', 'admin' => 'Admin'] : ['penyewa' => 'Penyewa'];
+    }
+
+    /** @return string nama akun yang dibuat */
+    public function buat(string $peranAktor, array $in): string
+    {
+        $peran = (string)($in['peran'] ?? 'penyewa');
+        if (!array_key_exists($peran, $this->peranBolehDibuat($peranAktor))) {
+            throw new AppException('Anda tidak berwenang membuat akun dengan peran tersebut.');
+        }
+        $nama = trim((string)($in['nama'] ?? ''));
+        $username = trim((string)($in['username'] ?? ''));
+        $password = (string)($in['password'] ?? '');
+        $noHp = preg_replace('/[\s-]/', '', (string)($in['no_hp'] ?? ''));
+        $nik = trim((string)($in['nik'] ?? ''));
+        $alamat = trim((string)($in['alamat'] ?? ''));
+
+        if ($nama === '' || $username === '' || $password === '') {
+            throw new AppException('Nama, username, dan password wajib diisi.');
+        }
+        if ($peran === 'penyewa' && ($noHp === '' || $nik === '' || $alamat === '')) {
+            throw new AppException('Untuk akun penyewa, nomor HP, NIK, dan alamat wajib diisi.');
+        }
+        if (mb_strlen($nama) > 100 || mb_strlen($alamat) > 255) {
+            throw new AppException('Nama maksimal 100 karakter dan alamat maksimal 255 karakter.');
+        }
+        $this->auth->validasiUsername($username);
+        $this->auth->pastikanPasswordKuat($password);
+        if ($password !== (string)($in['password2'] ?? '')) {
+            throw new AppException('Konfirmasi password tidak sama.');
+        }
+        if ($noHp !== '' && !preg_match('/^[0-9+]{8,20}$/', $noHp)) {
+            throw new AppException('Nomor HP tidak valid.');
+        }
+        if ($nik !== '' && !preg_match('/^[0-9]{16}$/', $nik)) {
+            throw new AppException('NIK harus 16 digit angka.');
+        }
+        if ($this->repo->byUsername($username) !== null) {
+            throw new AppException('Username sudah dipakai.');
+        }
+        try {
+            $this->repo->create([
+                'nama' => $nama, 'username' => $username, 'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+                'no_hp' => $noHp !== '' ? $noHp : null, 'nik' => $nik !== '' ? $nik : null, 'alamat' => $alamat !== '' ? $alamat : null,
+                'peran' => $peran, 'status_akun' => 'aktif', 'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (PDOException $e) {
+            if ($e->getCode() === '23000') {
+                throw new AppException('Username sudah dipakai.');
+            }
+            throw $e;
+        }
+        return $nama;
+    }
+
+    /** Akun penyewa yang boleh diubah username/password-nya oleh admin atau pemilik. */
+    public function penyewaUntukDiubah(int $id): array
+    {
+        $u = $this->repo->byId($id);
+        if ($u === null || $u['peran'] !== 'penyewa') {
+            throw new AppException('Hanya akun penyewa yang dapat diubah dari sini.');
+        }
+        if (str_starts_with((string)$u['username'], 'terhapus_')) {
+            throw new AppException('Data pribadi akun ini sudah dihapus.');
+        }
+        return $u;
+    }
+
+    /** @return string nama penyewa */
+    public function ubahKredensialPenyewa(int $id, string $username, string $password): string
+    {
+        $u = $this->penyewaUntukDiubah($id);
+        $username = trim($username);
+        $this->auth->validasiUsername($username);
+        $ada = $this->repo->byUsername($username);
+        if ($ada !== null && (int)$ada['id_pengguna'] !== $id) {
+            throw new AppException('Username sudah dipakai.');
+        }
+        $data = ['username' => $username];
+        if ($password !== '') {
+            $this->auth->pastikanPasswordKuat($password);
+            $data['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
+        }
+        try {
+            $this->repo->update($id, $data);
+        } catch (PDOException $e) {
+            if ($e->getCode() === '23000') {
+                throw new AppException('Username sudah dipakai.');
+            }
+            throw $e;
+        }
+        return $u['nama'];
     }
 
     public function daftar(?string $peran, string $q, int $page): array

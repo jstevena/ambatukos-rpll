@@ -58,7 +58,7 @@ class AuthService
     }
 
     /** Aturan password: 8-72 karakter, ada huruf besar, huruf kecil, dan angka. */
-    private function pastikanPasswordKuat(string $password): void
+    public function pastikanPasswordKuat(string $password): void
     {
         if (strlen($password) < 8 || strlen($password) > 72
             || !preg_match('/[a-z]/', $password) || !preg_match('/[A-Z]/', $password) || !preg_match('/[0-9]/', $password)) {
@@ -81,6 +81,43 @@ class AuthService
             throw new AppException('Password baru harus berbeda dari password saat ini.');
         }
         $this->repo->updatePassword($idPengguna, password_hash($baru, PASSWORD_DEFAULT));
+    }
+
+    public function validasiUsername(string $username): void
+    {
+        if (!preg_match('/^[A-Za-z0-9_.]{4,50}$/', $username)) {
+            throw new AppException('Username 4-50 karakter: huruf, angka, titik, atau garis bawah.');
+        }
+    }
+
+    /** Admin/pemilik mengubah username sendiri. Penyewa tidak diizinkan (diubah oleh admin/pemilik). */
+    public function ubahUsername(int $idPengguna, string $usernameBaru, string $password): string
+    {
+        $u = $this->repo->byId($idPengguna);
+        if ($u === null) {
+            throw new AppException('Akun tidak ditemukan.');
+        }
+        if ($u['peran'] === 'penyewa') {
+            throw new AppException('Penyewa tidak dapat mengubah username. Hubungi admin.');
+        }
+        if (!password_verify($password, $u['password_hash'])) {
+            throw new AppException('Password saat ini salah.');
+        }
+        $usernameBaru = trim($usernameBaru);
+        $this->validasiUsername($usernameBaru);
+        $ada = $this->repo->byUsername($usernameBaru);
+        if ($ada !== null && (int)$ada['id_pengguna'] !== $idPengguna) {
+            throw new AppException('Username sudah dipakai.');
+        }
+        try {
+            $this->repo->update($idPengguna, ['username' => $usernameBaru]);
+        } catch (PDOException $e) {
+            if ($e->getCode() === '23000') {
+                throw new AppException('Username sudah dipakai.');
+            }
+            throw $e;
+        }
+        return $usernameBaru;
     }
 
     /** UC-02 Login: verifikasi hash, cek status akun, kembalikan data pengguna. */

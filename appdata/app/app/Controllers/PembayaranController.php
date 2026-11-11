@@ -40,7 +40,12 @@ class PembayaranController extends Controller
     public function unggah(string $id): void
     {
         $this->svc->unggah(Auth::id(), (int)$id, $_FILES['bukti'] ?? []);
-        flash('success', 'Bukti pembayaran terkirim. Status: Menunggu Verifikasi.');
+        $pesan = 'Bukti pembayaran terkirim. Status: Menunggu Verifikasi.';
+        $t = (new TagihanService())->detail((int)$id);
+        if ($t !== null && $t['jenis'] === 'DP') {
+            $pesan .= ' Setelah DP disetujui, saat kunjungan dan kamar sudah OK, serahkan fotokopi KTP kepada pengelola kos.';
+        }
+        flash('success', $pesan);
         $this->redirect('/pembayaran');
     }
 

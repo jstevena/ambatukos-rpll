@@ -91,12 +91,12 @@ function menu_for(?string $role): array
             ['Pembayaran', '/pembayaran'], ['Keluhan', '/keluhan'], ['Notifikasi', '/notifikasi'],
         ],
         'admin' => [
-            ['Dashboard', '/dashboard'], ['Kelola Kamar', '/admin/kamar'], ['Verifikasi Pembayaran', '/admin/verifikasi'],
+            ['Dashboard', '/dashboard'], ['Data Kamar', '/admin/kamar'], ['Verifikasi Pembayaran', '/admin/verifikasi'],
             ['Penyewa Belum Bayar', '/admin/belum-bayar'], ['Pengumuman Sewa', '/admin/pengumuman'],
-            ['Keluhan', '/keluhan'], ['Pengguna', '/pengguna'], ['Laporan Pendapatan', '/laporan'],
+            ['Keluhan', '/keluhan'], ['Pengguna', '/pengguna'],
         ],
         'pemilik' => [
-            ['Dashboard', '/dashboard'], ['Kenaikan Sewa', '/pemilik/kenaikan-sewa'], ['Pengguna', '/pengguna'], ['Laporan Pendapatan', '/laporan'],
+            ['Dashboard', '/dashboard'], ['Kelola Kamar', '/admin/kamar'], ['Kenaikan Sewa', '/pemilik/kenaikan-sewa'], ['Pengguna', '/pengguna'], ['Laporan Pendapatan', '/laporan'],
         ],
         default => [['Daftar Kamar', '/kamar']],
     };

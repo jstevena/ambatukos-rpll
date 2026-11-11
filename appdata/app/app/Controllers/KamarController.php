@@ -47,7 +47,7 @@ class KamarController extends Controller
 
     public function simpanBaru(): void
     {
-        $this->svc->simpan(null, $this->svc->pemilikId(), $_POST, FileStorageHandler::normalisasi($_FILES['foto'] ?? null));
+        $this->svc->simpan(null, Auth::id(), $_POST, FileStorageHandler::normalisasi($_FILES['foto'] ?? null));
         flash('success', 'Kamar berhasil ditambahkan.');
         $this->redirect('/admin/kamar');
     }
@@ -63,7 +63,7 @@ class KamarController extends Controller
 
     public function simpanUbah(string $id): void
     {
-        $this->svc->simpan((int)$id, $this->svc->pemilikId(), $_POST, FileStorageHandler::normalisasi($_FILES['foto'] ?? null));
+        $this->svc->simpan((int)$id, Auth::id(), $_POST, FileStorageHandler::normalisasi($_FILES['foto'] ?? null));
         flash('success', 'Data kamar berhasil diperbarui.');
         $this->redirect('/admin/kamar');
     }

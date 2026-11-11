@@ -7,10 +7,7 @@
   <a class="stat danger" href="/admin/belum-bayar" style="text-decoration:none;color:inherit"><div class="n"><?= (int)$belumBayar ?></div><div class="l">Penyewa Belum Bayar</div></a>
 </div>
 
-<div class="grid grid-2">
-  <div class="card"><h2>Grafik Pendapatan (6 bulan)</h2><?php include __DIR__ . '/_chart.php'; ?></div>
-  <div class="card"><h2>Status Kamar</h2><?php include __DIR__ . '/_status.php'; ?></div>
-</div>
+<div class="card"><h2>Status Kamar</h2><?php include __DIR__ . '/_status.php'; ?></div>
 
 <div class="card">
   <h2>Pembayaran Menunggu Verifikasi</h2>

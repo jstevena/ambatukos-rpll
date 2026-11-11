@@ -102,7 +102,7 @@ class PembayaranService
                     'status' => 'Belum Dibayar', 'pengingat_terkirim' => 0,
                 ]);
                 $this->notif->kirim($idPenyewa, 'verifikasi', sprintf(
-                    'DP kamar %s disetujui. Kunjungi kamar pada %s, lalu lunasi %s paling lambat %s.',
+                    'DP kamar %s disetujui. Kunjungi kamar pada %s; jika sudah OK, serahkan fotokopi KTP, lalu lunasi %s paling lambat %s.',
                     $kamar['nomor_kamar'], tgl($p['tanggal_kunjungan']), rupiah($sisa), tgl($p['tanggal_masuk'])
                 ));
             } elseif ($t['jenis'] === 'Pelunasan') {

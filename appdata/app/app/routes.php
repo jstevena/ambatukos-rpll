@@ -36,14 +36,14 @@ $r->post('/pembayaran/upload/{id}', [PembayaranController::class, 'unggah'], $P)
 $r->get('/berkas/bukti/{id}', [PembayaranController::class, 'bukti'], $ALL);
 
 // Admin
-$r->get('/admin/kamar', [KamarController::class, 'kelola'], $A);
-$r->get('/admin/kamar/baru', [KamarController::class, 'formBaru'], $A);
-$r->post('/admin/kamar', [KamarController::class, 'simpanBaru'], $A);
-$r->get('/admin/kamar/{id}/ubah', [KamarController::class, 'formUbah'], $A);
-$r->post('/admin/kamar/{id}', [KamarController::class, 'simpanUbah'], $A);
-$r->post('/admin/kamar/{id}/hapus', [KamarController::class, 'hapus'], $A);
-$r->post('/admin/kamar/foto/{id}/hapus', [KamarController::class, 'hapusFoto'], $A);
-$r->post('/admin/pemesanan/{id}/akhiri', [PemesananController::class, 'akhiri'], $A);
+$r->get('/admin/kamar', [KamarController::class, 'kelola'], $AO); // admin: hanya lihat
+$r->get('/admin/kamar/baru', [KamarController::class, 'formBaru'], $O);
+$r->post('/admin/kamar', [KamarController::class, 'simpanBaru'], $O);
+$r->get('/admin/kamar/{id}/ubah', [KamarController::class, 'formUbah'], $O);
+$r->post('/admin/kamar/{id}', [KamarController::class, 'simpanUbah'], $O);
+$r->post('/admin/kamar/{id}/hapus', [KamarController::class, 'hapus'], $O);
+$r->post('/admin/kamar/foto/{id}/hapus', [KamarController::class, 'hapusFoto'], $O);
+$r->post('/admin/pemesanan/{id}/akhiri', [PemesananController::class, 'akhiri'], $AO);
 $r->get('/admin/verifikasi', [PembayaranController::class, 'verifikasi'], $A);
 $r->get('/admin/verifikasi/{id}', [PembayaranController::class, 'tinjau'], $A);
 $r->post('/admin/verifikasi/{id}/setujui', [PembayaranController::class, 'setujui'], $A);
@@ -61,10 +61,14 @@ $r->post('/pemilik/kenaikan-sewa', [PengumumanSewaController::class, 'tetapkan']
 $r->get('/pengguna', [PenggunaController::class, 'index'], $AO);
 $r->post('/pengguna/{id}/hapus', [PenggunaController::class, 'hapus'], $AO);
 $r->post('/pengguna/{id}/status', [PenggunaController::class, 'status'], $AO);
+$r->get('/pengguna/baru', [PenggunaController::class, 'formBaru'], $AO);
+$r->post('/pengguna', [PenggunaController::class, 'simpanBaru'], $AO);
+$r->get('/pengguna/{id}/ubah', [PenggunaController::class, 'formUbah'], $AO);
+$r->post('/pengguna/{id}/ubah', [PenggunaController::class, 'ubah'], $AO);
 
 // Laporan
-$r->get('/laporan', [LaporanController::class, 'index'], $AO);
-$r->get('/laporan/unduh', [LaporanController::class, 'unduh'], $A);
+$r->get('/laporan', [LaporanController::class, 'index'], $O);
+$r->get('/laporan/unduh', [LaporanController::class, 'unduh'], $O);
 
 // Keluhan
 $r->get('/keluhan', [KeluhanController::class, 'index'], ['penyewa', 'admin']);
@@ -74,6 +78,7 @@ $r->post('/keluhan/{id}/status', [KeluhanController::class, 'ubahStatus'], $A);
 // Akun saya (semua peran)
 $r->get('/akun', [AkunController::class, 'form'], $ALL);
 $r->post('/akun/password', [AkunController::class, 'ubahPassword'], $ALL);
+$r->post('/akun/username', [AkunController::class, 'ubahUsername'], $AO);
 
 // Notifikasi
 $r->get('/notifikasi', [NotifikasiController::class, 'index'], $ALL);

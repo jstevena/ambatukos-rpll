@@ -21,6 +21,30 @@ class PenggunaController extends Controller
         ]);
     }
 
+    public function formBaru(): void
+    {
+        $this->view('pengguna/baru', ['title' => 'Tambah Pengguna', 'peranBoleh' => $this->svc->peranBolehDibuat((string)Auth::role())]);
+    }
+
+    public function simpanBaru(): void
+    {
+        $nama = $this->svc->buat((string)Auth::role(), $_POST);
+        flash('success', 'Akun "' . $nama . '" berhasil dibuat.');
+        $this->redirect('/pengguna');
+    }
+
+    public function formUbah(string $id): void
+    {
+        $this->view('pengguna/ubah', ['title' => 'Ubah Akun Penyewa', 'u' => $this->svc->penyewaUntukDiubah((int)$id)]);
+    }
+
+    public function ubah(string $id): void
+    {
+        $nama = $this->svc->ubahKredensialPenyewa((int)$id, $this->input('username'), (string)($_POST['password'] ?? ''));
+        flash('success', 'Akun "' . $nama . '" diperbarui.');
+        $this->redirect('/pengguna');
+    }
+
     public function hapus(string $id): void
     {
         $r = $this->svc->hapus(Auth::id(), (string)Auth::role(), (int)$id);

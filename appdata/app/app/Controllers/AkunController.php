@@ -8,6 +8,14 @@ class AkunController extends Controller
         $this->view('akun/password', ['title' => 'Akun Saya', 'user' => Auth::user()]);
     }
 
+    public function ubahUsername(): void
+    {
+        $baru = (new AuthService())->ubahUsername(Auth::id(), (string)($_POST['username'] ?? ''), (string)($_POST['password_lama'] ?? ''));
+        $_SESSION['user']['username'] = $baru;
+        flash('success', 'Username berhasil diubah. Gunakan username baru saat masuk berikutnya.');
+        $this->redirect('/akun');
+    }
+
     public function ubahPassword(): void
     {
         (new AuthService())->ubahPassword(

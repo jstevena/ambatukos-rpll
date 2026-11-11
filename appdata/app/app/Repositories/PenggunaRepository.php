@@ -18,6 +18,11 @@ class PenggunaRepository extends Repository
         return $this->insert('pengguna', $data);
     }
 
+    public function update(int $id, array $data): void
+    {
+        $this->updateById('pengguna', 'id_pengguna', $id, $data);
+    }
+
     public function updatePassword(int $id, string $hash): void
     {
         Database::exec('UPDATE pengguna SET password_hash = ? WHERE id_pengguna = ?', [$hash, $id]);
@@ -62,7 +67,7 @@ class PenggunaRepository extends Repository
             "SELECT id_pengguna, nama, username, no_hp, nik, peran, status_akun, created_at,
                     (peran = 'penyewa' AND " . self::MANTAN . ") AS mantan
                FROM pengguna $w
-              ORDER BY FIELD(peran, 'admin', 'pemilik', 'penyewa'), nama LIMIT " . (int)$per . ' OFFSET ' . (int)$offset,
+              ORDER BY FIELD(peran, 'pemilik', 'admin', 'penyewa'), nama LIMIT " . (int)$per . ' OFFSET ' . (int)$offset,
             $p
         );
         return [$rows, $total];
