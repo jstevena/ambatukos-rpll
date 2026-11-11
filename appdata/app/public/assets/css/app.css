@@ -52,6 +52,9 @@ a{color:var(--accent)} small,.muted{color:var(--muted)} small{font-size:12px} .s
 .topbar-inner{display:flex;align-items:center;gap:12px;padding:6px 12px;max-width:1680px;margin:0 auto}
 .brand{display:flex;align-items:center;gap:9px;color:var(--text);text-decoration:none;font-weight:700;font-size:17px;letter-spacing:-.2px;white-space:nowrap}
 .brand .logo{width:28px;height:28px;object-fit:contain;flex:none}
+.logo-dark{display:none}
+[data-theme="dark"] .logo-light{display:none}
+[data-theme="dark"] .logo-dark{display:inline}
 .pillnav{display:flex;flex:0 0 auto;gap:2px;padding:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;margin:0 auto}
 .pillnav a{padding:6px 13px;font-size:13px;border-radius:999px;color:var(--muted);text-decoration:none;white-space:nowrap;font-weight:500;transition:background .15s,color .15s}
 .pillnav a:hover{color:var(--text)}
