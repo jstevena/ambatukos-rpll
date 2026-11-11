@@ -57,6 +57,11 @@ $r->post('/admin/pengumuman/{id}/umumkan', [PengumumanSewaController::class, 'um
 $r->get('/pemilik/kenaikan-sewa', [PengumumanSewaController::class, 'pemilik'], $O);
 $r->post('/pemilik/kenaikan-sewa', [PengumumanSewaController::class, 'tetapkan'], $O);
 
+// Manajemen pengguna (admin & pemilik)
+$r->get('/pengguna', [PenggunaController::class, 'index'], $AO);
+$r->post('/pengguna/{id}/hapus', [PenggunaController::class, 'hapus'], $AO);
+$r->post('/pengguna/{id}/status', [PenggunaController::class, 'status'], $AO);
+
 // Laporan
 $r->get('/laporan', [LaporanController::class, 'index'], $AO);
 $r->get('/laporan/unduh', [LaporanController::class, 'unduh'], $A);

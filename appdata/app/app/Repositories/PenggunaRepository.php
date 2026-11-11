@@ -29,6 +29,86 @@ class PenggunaRepository extends Repository
         return array_map('intval', array_column($rows, 'id_pengguna'));
     }
 
+    /** @return array{0: array, 1: int} */
+    public function paginate(?string $peran, string $q, int $page, int $per): array
+    {
+        $where = [];
+        $p = [];
+        if ($peran !== null) {
+            $where[] = 'peran = ?';
+            $p[] = $peran;
+        }
+        if ($q !== '') {
+            $like = '%' . addcslashes($q, '%_\\') . '%';
+            $where[] = '(nama LIKE ? OR username LIKE ? OR no_hp LIKE ?)';
+            array_push($p, $like, $like, $like);
+        }
+        $w = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+        $total = (int)Database::val("SELECT COUNT(*) FROM pengguna $w", $p);
+        $offset = max(0, ($page - 1) * $per);
+        $rows = Database::all(
+            "SELECT id_pengguna, nama, username, no_hp, nik, peran, status_akun, created_at FROM pengguna $w
+              ORDER BY FIELD(peran, 'admin', 'pemilik', 'penyewa'), nama LIMIT " . (int)$per . ' OFFSET ' . (int)$offset,
+            $p
+        );
+        return [$rows, $total];
+    }
+
+    public function countByPeran(string $peran, bool $aktifSaja = false): int
+    {
+        return (int)Database::val(
+            'SELECT COUNT(*) FROM pengguna WHERE peran = ?' . ($aktifSaja ? " AND status_akun = 'aktif'" : ''),
+            [$peran]
+        );
+    }
+
+    public function setStatus(int $id, string $status): void
+    {
+        Database::exec('UPDATE pengguna SET status_akun = ? WHERE id_pengguna = ?', [$status, $id]);
+    }
+
+    /** Notifikasi milik pengguna ikut dihapus; data transaksi tetap menahan penghapusan (FK RESTRICT). */
+    public function hapus(int $id): void
+    {
+        Database::exec('DELETE FROM notifikasi WHERE id_pengguna = ?', [$id]);
+        Database::exec('DELETE FROM pengguna WHERE id_pengguna = ?', [$id]);
+    }
+
+    public function punyaPemesananBerjalan(int $id): bool
+    {
+        return Database::val(
+            "SELECT 1 FROM pemesanan WHERE id_penyewa = ? AND status IN ('Menunggu DP','Menunggu Pelunasan','Aktif') LIMIT 1", [$id]
+        ) !== null;
+    }
+
+    public function punyaTagihanBelumLunas(int $id): bool
+    {
+        return Database::val(
+            "SELECT 1 FROM tagihan t JOIN pemesanan p ON p.id_pemesanan = t.id_pemesanan
+              WHERE p.id_penyewa = ? AND t.status IN ('Belum Dibayar','Terlambat','Menunggu Verifikasi') LIMIT 1", [$id]
+        ) !== null;
+    }
+
+    public function punyaPengembalianTertunda(int $id): bool
+    {
+        return Database::val(
+            "SELECT 1 FROM pembayaran pb JOIN tagihan t ON t.id_tagihan = pb.id_tagihan
+               JOIN pemesanan p ON p.id_pemesanan = t.id_pemesanan
+              WHERE p.id_penyewa = ? AND pb.status = 'Menunggu Pengembalian' LIMIT 1", [$id]
+        ) !== null;
+    }
+
+    /** Hapus data pribadi; baris dipertahankan agar riwayat transaksi tetap utuh. Akun tidak dapat dipakai login lagi. */
+    public function anonimkan(int $id): void
+    {
+        Database::exec('DELETE FROM notifikasi WHERE id_pengguna = ?', [$id]);
+        Database::exec(
+            "UPDATE pengguna SET nama = ?, username = ?, password_hash = ?, no_hp = NULL, nik = NULL, alamat = NULL, status_akun = 'nonaktif'
+              WHERE id_pengguna = ?",
+            ['Mantan Penyewa #' . $id, 'terhapus_' . $id, password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT), $id]
+        );
+    }
+
     public function count(): int
     {
         return (int)Database::val('SELECT COUNT(*) FROM pengguna');
