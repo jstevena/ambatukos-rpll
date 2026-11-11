@@ -16,6 +16,7 @@ $inisial = $user ? mb_strtoupper(mb_substr($user['nama'], 0, 1)) : '';
 <!doctype html>
 <html lang="id">
 <head>
+  <link rel="icon" type="image/png" href="/assets/img/logo.png">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
@@ -43,7 +44,8 @@ $inisial = $user ? mb_strtoupper(mb_substr($user['nama'], 0, 1)) : '';
       </button>
     <?php endif; ?>
     <a class="brand" href="/">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12" fill="none" stroke="var(--accent)" stroke-width="5"/><circle cx="16" cy="16" r="4.5" fill="var(--accent-2)"/></svg>
+      <img class="logo logo-light" src="/assets/img/logo.png" alt="" width="28" height="28">
+	  <img class="logo logo-dark" src="/assets/img/logo-dark.png" alt="" width="28" height="28">
       <span>AmbatuKos</span>
     </a>
 
