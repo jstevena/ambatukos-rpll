@@ -1,0 +1,6 @@
+.env
+appdata/mariadb/data/
+appdata/app/storage/bukti/*
+!appdata/app/storage/bukti/.gitkeep
+appdata/app/public/uploads/kamar/*
+!appdata/app/public/uploads/kamar/.gitkeep

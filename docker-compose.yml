@@ -1,0 +1,86 @@
+###############################################
+# Common Keys
+###############################################
+x-common-keys: &common-keys
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+
+###############################################
+# AMBATUKOS DB (MARIADB)
+###############################################
+  ambatukos-db:
+    <<: *common-keys
+    container_name: ambatukos-db
+    image: mariadb:11
+    cpus: 0.50
+    mem_limit: 512m
+    environment:
+      - TZ=Asia/Jakarta
+      - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MARIADB_DATABASE=${DB_NAME}
+      - MARIADB_USER=${DB_USER}
+      - MARIADB_PASSWORD=${DB_PASSWORD}
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-time-zone=+07:00
+    volumes:
+      - ./appdata/mariadb/data:/var/lib/mysql
+      - ./appdata/mariadb/init.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+###############################################
+# AMBATUKOS WEB (PHP + APACHE)
+###############################################
+  ambatukos-web:
+    <<: *common-keys
+    container_name: ambatukos-web
+    build: ./appdata/php
+    cpus: 0.50
+    mem_limit: 256m
+    env_file: .env
+    environment:
+      - TZ=Asia/Jakarta
+    depends_on:
+      ambatukos-db:
+        condition: service_healthy
+    ports:
+      - "${BIND_IP:-172.20.0.1}:${APP_PORT:-8079}:80" # Bind ke IP Gateway
+    volumes:
+      - ./appdata/app:/var/www/html
+
+###############################################
+# AMBATUKOS SCHEDULER (UC-11, TERPISAH DARI WEB)
+###############################################
+  ambatukos-scheduler:
+    <<: *common-keys
+    container_name: ambatukos-scheduler
+    build: ./appdata/php
+    cpus: 0.10
+    mem_limit: 128m
+    env_file: .env
+    environment:
+      - TZ=Asia/Jakarta
+    depends_on:
+      ambatukos-db:
+        condition: service_healthy
+    command: ["php", "/var/www/html/scheduler/run.php", "--loop"]
+    volumes:
+      - ./appdata/app:/var/www/html
+
+###############################################
+# Dedicated Network
+###############################################
+networks:
+  default:
+    name: ambatukos
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
