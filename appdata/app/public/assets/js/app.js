@@ -100,4 +100,14 @@
     });
     wrap.appendChild(b);
   });
+
+  // ---- Input nominal: 1600000 -> Rp1.600.000 saat mengetik (server menormalkan ulang) ----
+  function fmtRp(v) {
+    var d = String(v).replace(/,\d{1,2}$/, '').replace(/\D/g, '').replace(/^0+/, '').slice(0, 10);
+    return d === '' ? '' : 'Rp' + d.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+  document.querySelectorAll('input[data-rupiah]').forEach(function (inp) {
+    inp.value = fmtRp(inp.value);
+    inp.addEventListener('input', function () { inp.value = fmtRp(inp.value); });
+  });
 })();

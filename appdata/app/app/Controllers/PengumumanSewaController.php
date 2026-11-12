@@ -10,6 +10,13 @@ class PengumumanSewaController extends Controller
         $this->svc = new PengumumanSewaService();
     }
 
+    private function pesanDiumumkan(int $n): string
+    {
+        return $n > 0
+            ? "Kenaikan sewa diumumkan. Notifikasi dikirim ke $n penyewa."
+            : 'Kenaikan sewa diumumkan. Kamar ini belum memiliki penyewa aktif sehingga tidak ada notifikasi terkirim.';
+    }
+
     /** UI-11 Pengumuman Kenaikan Sewa (admin). */
     public function admin(): void
     {
@@ -18,10 +25,8 @@ class PengumumanSewaController extends Controller
 
     public function umumkan(string $id): void
     {
-        $n = $this->svc->umumkan(Auth::id(), (int)$id);
-        flash('success', $n > 0
-            ? "Kenaikan sewa diumumkan. Notifikasi dikirim ke $n penyewa."
-            : 'Kenaikan sewa diumumkan. Kamar ini belum memiliki penyewa aktif sehingga tidak ada notifikasi terkirim.');
+        $n = $this->svc->umumkan(Auth::id(), 'admin', (int)$id);
+        flash('success', $this->pesanDiumumkan($n));
         $this->redirect('/admin/pengumuman');
     }
 
@@ -36,8 +41,21 @@ class PengumumanSewaController extends Controller
 
     public function tetapkan(): void
     {
-        $this->svc->tetapkan(Auth::id(), (int)($_POST['id_kamar'] ?? 0), $this->input('biaya_baru'), $this->input('tanggal_berlaku'));
-        flash('success', 'Kenaikan sewa ditetapkan. Admin telah diberi tahu untuk mengumumkannya.');
+        $langsung = $this->input('aksi') === 'umumkan';
+        $n = $this->svc->tetapkan(
+            Auth::id(), (int)($_POST['id_kamar'] ?? 0), $this->input('biaya_baru'), $this->input('tanggal_berlaku'), $langsung
+        );
+        flash('success', $n === null
+            ? 'Kenaikan sewa ditetapkan. Admin telah diberi tahu untuk mengumumkannya.'
+            : 'Kenaikan sewa ditetapkan dan langsung diumumkan. ' . ($n > 0 ? "Notifikasi dikirim ke $n penyewa." : 'Kamar ini belum memiliki penyewa aktif sehingga tidak ada notifikasi terkirim.'));
+        $this->redirect('/pemilik/kenaikan-sewa');
+    }
+
+    /** Pemilik mengumumkan sendiri penetapan yang masih berstatus Ditetapkan. */
+    public function umumkanPemilik(string $id): void
+    {
+        $n = $this->svc->umumkan(Auth::id(), 'pemilik', (int)$id);
+        flash('success', $this->pesanDiumumkan($n));
         $this->redirect('/pemilik/kenaikan-sewa');
     }
 }

@@ -21,7 +21,7 @@ function url(string $path = ''): string
 
 function rupiah(mixed $n): string
 {
-    return 'Rp ' . number_format((float)$n, 0, ',', '.');
+    return 'Rp' . number_format((float)$n, 0, ',', '.');
 }
 
 function tgl(?string $d, bool $jam = false): string
@@ -162,4 +162,14 @@ function tampil_hp(?string $hp): string
         return '-';
     }
     return normalisasi_hp($hp) ?? $hp;
+}
+
+/**
+ * Normalisasi input nominal rupiah menjadi deret angka saja.
+ * "Rp1.600.000", "1.600.000,00", "1600000" -> "1600000". String kosong bila tidak ada angka.
+ */
+function normalisasi_rupiah(?string $v): string
+{
+    $v = preg_replace('/,\d{1,2}$/', '', trim((string)$v)); // buang desimal (,00)
+    return ltrim((string)preg_replace('/\D/', '', $v), '0');
 }

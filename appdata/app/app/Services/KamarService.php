@@ -77,8 +77,8 @@ class KamarService
         $nomor = trim((string)($in['nomor_kamar'] ?? ''));
         $luas = str_replace(',', '.', trim((string)($in['luas'] ?? '')));
         $fasilitas = trim((string)($in['fasilitas'] ?? ''));
-        $bulan = (string)($in['biaya_per_bulan'] ?? '');
-        $tahun = trim((string)($in['biaya_per_tahun'] ?? ''));
+        $bulan = normalisasi_rupiah((string)($in['biaya_per_bulan'] ?? ''));
+        $tahun = normalisasi_rupiah((string)($in['biaya_per_tahun'] ?? ''));
         $jenis = (string)($in['jenis_sewa'] ?? '');
 
         if ($nomor === '' || $luas === '' || $bulan === '' || $jenis === '') {
@@ -90,10 +90,10 @@ class KamarService
         if (!is_numeric($luas) || (float)$luas <= 0 || (float)$luas > 999.99) {
             throw new AppException('Luas kamar tidak valid.');
         }
-        if (!ctype_digit($bulan) || (float)$bulan <= 0) {
+        if (!ctype_digit($bulan) || (float)$bulan <= 0 || strlen($bulan) > 10) {
             throw new AppException('Biaya per bulan harus berupa angka lebih dari 0.');
         }
-        if ($tahun !== '' && (!ctype_digit($tahun) || (float)$tahun <= 0)) {
+        if ($tahun !== '' && (!ctype_digit($tahun) || (float)$tahun <= 0 || strlen($tahun) > 10)) {
             throw new AppException('Biaya per tahun harus berupa angka lebih dari 0.');
         }
         if (!in_array($jenis, ['tetap', 'sementara'], true)) {

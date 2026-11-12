@@ -60,6 +60,7 @@ $r->post('/admin/pengumuman/{id}/umumkan', [PengumumanSewaController::class, 'um
 // Pemilik
 $r->get('/pemilik/kenaikan-sewa', [PengumumanSewaController::class, 'pemilik'], $O);
 $r->post('/pemilik/kenaikan-sewa', [PengumumanSewaController::class, 'tetapkan'], $O);
+$r->post('/pemilik/kenaikan-sewa/{id}/umumkan', [PengumumanSewaController::class, 'umumkanPemilik'], $O);
 
 // Manajemen pengguna (admin & pemilik)
 $r->get('/pengguna', [PenggunaController::class, 'index'], $AO);

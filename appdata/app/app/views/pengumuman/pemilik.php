@@ -1,4 +1,4 @@
-<div class="page-head"><div><h1>Kenaikan Sewa</h1><p class="muted" style="margin:0">Tetapkan biaya sewa baru; admin akan mengumumkannya kepada penyewa.</p></div></div>
+<div class="page-head"><div><h1>Kenaikan Sewa</h1><p class="muted" style="margin:0">Tetapkan biaya sewa baru dan umumkan langsung kepada penyewa, atau serahkan pengumumannya ke admin.</p></div></div>
 <div class="card form-narrow">
   <h2>Tetapkan Kenaikan</h2>
   <form method="post" action="/pemilik/kenaikan-sewa">
@@ -13,15 +13,18 @@
       </select>
     </div>
     <div class="field">
-      <label for="biaya_baru">Biaya baru per bulan (Rp)</label>
-      <input type="number" id="biaya_baru" name="biaya_baru" min="1" step="1" value="<?= e(old('biaya_baru')) ?>" required>
+      <label for="biaya_baru">Biaya baru per bulan</label>
+      <input type="text" inputmode="numeric" data-rupiah id="biaya_baru" name="biaya_baru" value="<?= e(old('biaya_baru')) ?>" placeholder="Rp1.600.000" required>
     </div>
     <div class="field">
       <label for="tanggal_berlaku">Tanggal berlaku</label>
       <input type="date" id="tanggal_berlaku" name="tanggal_berlaku" min="<?= e($minTanggal) ?>" value="<?= e(old('tanggal_berlaku')) ?>" required>
       <div class="hint">Minimal 30 hari dari hari ini (paling cepat <?= e(tgl($minTanggal)) ?>).</div>
     </div>
-    <button class="btn" type="submit">Tetapkan</button>
+    <div class="btn-row">
+      <button class="btn" type="submit" name="aksi" value="umumkan" onclick="return confirm('Tetapkan dan umumkan sekarang? Penyewa aktif akan langsung diberi notifikasi.');">Tetapkan &amp; Umumkan</button>
+      <button class="btn btn-outline" type="submit" name="aksi" value="tetapkan">Simpan saja (diumumkan admin)</button>
+    </div>
   </form>
 </div>
 
@@ -32,7 +35,7 @@
   <?php else: ?>
   <div class="table-wrap">
     <table class="table-cards">
-      <thead><tr><th>Kamar</th><th class="num">Biaya baru</th><th>Berlaku</th><th>Status</th></tr></thead>
+      <thead><tr><th>Kamar</th><th class="num">Biaya baru</th><th>Berlaku</th><th>Status</th><th></th></tr></thead>
       <tbody>
       <?php foreach ($daftar as $s): ?>
         <tr>
@@ -40,6 +43,13 @@
           <td data-label="Biaya baru" class="num"><?= rupiah($s['biaya_baru']) ?></td>
           <td data-label="Berlaku"><?= e(tgl($s['tanggal_berlaku'])) ?></td>
           <td data-label="Status"><?= badge($s['status']) ?></td>
+          <td>
+            <?php if ($s['status'] === 'Ditetapkan'): ?>
+              <form method="post" action="/pemilik/kenaikan-sewa/<?= (int)$s['id_pengumuman'] ?>/umumkan" data-confirm="Umumkan kenaikan sewa ini sekarang ke penyewa terkait?">
+                <?= csrf_field() ?><button class="btn btn-sm" type="submit">Umumkan</button>
+              </form>
+            <?php endif; ?>
+          </td>
         </tr>
       <?php endforeach; ?>
       </tbody>

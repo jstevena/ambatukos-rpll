@@ -1,7 +1,10 @@
 <?php
 declare(strict_types=1);
 
-/** UC-14 Tetapkan Kenaikan Sewa (pemilik) dan UC-09 Umumkan Kenaikan Sewa (admin); BR-12. */
+/**
+ * Kenaikan sewa (BR-12). Pemilik menetapkan dan boleh langsung mengumumkan;
+ * admin juga dapat mengumumkan penetapan yang belum diumumkan.
+ */
 class PengumumanSewaService
 {
     public const MIN_HARI = 30;
@@ -29,54 +32,75 @@ class PengumumanSewaService
         return $this->repo->jumlahDitetapkan();
     }
 
-    public function tetapkan(int $idPemilik, int $idKamar, string $biaya, string $berlaku): int
+    /**
+     * @return int|null null = hanya ditetapkan (menunggu diumumkan);
+     *                  int  = sudah diumumkan, nilainya jumlah penyewa yang diberi notifikasi.
+     */
+    public function tetapkan(int $idPemilik, int $idKamar, string $biaya, string $berlaku, bool $langsung = false): ?int
     {
         $kamar = $this->kamar->find($idKamar);
         if ($kamar === null) {
             throw new AppException('Pilih kamar yang valid.');
         }
-        if (!ctype_digit($biaya) || (float)$biaya <= 0) {
+        $biaya = normalisasi_rupiah($biaya);
+        if (!ctype_digit($biaya) || (float)$biaya <= 0 || strlen($biaya) > 10) {
             throw new AppException('Biaya baru harus berupa angka lebih dari 0.');
         }
         $d = DateTime::createFromFormat('Y-m-d', $berlaku);
         if ($d === false || $d->format('Y-m-d') !== $berlaku) {
             throw new AppException('Tanggal berlaku tidak valid.');
         }
-        // Skenario usability #5: form menolak tanggal berlaku kurang dari 30 hari setelah pengumuman.
         $this->pastikanMinimal30Hari($berlaku);
 
-        $id = $this->repo->create([
-            'id_kamar' => $idKamar, 'id_pemilik' => $idPemilik, 'id_admin' => null,
-            'biaya_baru' => $biaya, 'tanggal_berlaku' => $berlaku, 'status' => 'Ditetapkan',
-        ]);
-        $this->notif->kirimKeAdmin('kenaikan_sewa', sprintf(
-            'Pemilik menetapkan kenaikan sewa kamar %s menjadi %s mulai %s. Mohon diumumkan.',
-            $kamar['nomor_kamar'], rupiah($biaya), tgl($berlaku)
-        ));
-        return $id;
+        return Database::transaction(function () use ($idPemilik, $idKamar, $biaya, $berlaku, $langsung, $kamar) {
+            $id = $this->repo->create([
+                'id_kamar' => $idKamar, 'id_pemilik' => $idPemilik, 'id_admin' => null,
+                'biaya_baru' => $biaya, 'tanggal_berlaku' => $berlaku, 'status' => 'Ditetapkan',
+            ]);
+            if ($langsung) {
+                return $this->terapkan($this->repo->find($id, true), $idPemilik, 'pemilik');
+            }
+            $this->notif->kirimKeAdmin('kenaikan_sewa', sprintf(
+                'Pemilik menetapkan kenaikan sewa kamar %s menjadi %s mulai %s. Mohon diumumkan.',
+                $kamar['nomor_kamar'], rupiah($biaya), tgl($berlaku)
+            ));
+            return null;
+        });
     }
 
-    public function umumkan(int $idAdmin, int $idPengumuman): int
+    /** Umumkan penetapan yang berstatus Ditetapkan. @return int jumlah penyewa yang diberi notifikasi */
+    public function umumkan(int $idAktor, string $peranAktor, int $idPengumuman): int
     {
-        return (int)Database::transaction(function () use ($idAdmin, $idPengumuman) {
+        return (int)Database::transaction(function () use ($idAktor, $peranAktor, $idPengumuman) {
             $s = $this->repo->find($idPengumuman, true);
             if ($s === null || $s['status'] !== 'Ditetapkan') {
                 throw new AppException('Penetapan tidak ditemukan atau sudah diumumkan.');
             }
-            // UC-09 alternative flow: tanggal berlaku kurang dari 30 hari.
-            $this->pastikanMinimal30Hari($s['tanggal_berlaku'], 'Penetapan ini tidak dapat diumumkan: ');
-            $this->repo->update($idPengumuman, ['status' => 'Diumumkan', 'id_admin' => $idAdmin]);
-            $kamar = $this->kamar->find((int)$s['id_kamar']);
-            $dikirim = 0;
-            foreach ($this->pemesanan->aktifByKamar((int)$s['id_kamar']) as $p) {
-                $this->notif->kirim((int)$p['id_penyewa'], 'kenaikan_sewa', sprintf(
-                    'Biaya sewa kamar %s naik menjadi %s per bulan mulai %s (berlaku untuk tagihan yang jatuh tempo pada/setelah tanggal tersebut).',
-                    $kamar['nomor_kamar'], rupiah($s['biaya_baru']), tgl($s['tanggal_berlaku'])
-                ));
-                $dikirim++;
-            }
-            return $dikirim; // 0 = kamar tanpa penyewa aktif (alternative flow)
+            return $this->terapkan($s, $idAktor, $peranAktor);
         });
+    }
+
+    private function terapkan(array $s, int $idAktor, string $peranAktor): int
+    {
+        $this->pastikanMinimal30Hari($s['tanggal_berlaku'], 'Penetapan ini tidak dapat diumumkan: ');
+        // id_admin hanya diisi bila yang mengumumkan admin; NULL = diumumkan langsung oleh pemilik.
+        $this->repo->update((int)$s['id_pengumuman'], ['status' => 'Diumumkan', 'id_admin' => $peranAktor === 'admin' ? $idAktor : null]);
+        $kamar = $this->kamar->find((int)$s['id_kamar']);
+        $dikirim = 0;
+        foreach ($this->pemesanan->aktifByKamar((int)$s['id_kamar']) as $p) {
+            $this->notif->kirim((int)$p['id_penyewa'], 'kenaikan_sewa', sprintf(
+                'Biaya sewa kamar %s naik menjadi %s per bulan mulai %s (berlaku untuk tagihan yang jatuh tempo pada/setelah tanggal tersebut).',
+                $kamar['nomor_kamar'], rupiah($s['biaya_baru']), tgl($s['tanggal_berlaku'])
+            ));
+            $dikirim++;
+        }
+        if ($peranAktor === 'pemilik') {
+            $this->notif->kirimKeAdmin('kenaikan_sewa', sprintf(
+                'Pemilik mengumumkan kenaikan sewa kamar %s menjadi %s mulai %s.',
+                $kamar['nomor_kamar'], rupiah($s['biaya_baru']), tgl($s['tanggal_berlaku'])
+            ));
+        }
+        return $dikirim; // 0 = kamar tanpa penyewa aktif
     }
 
     private function pastikanMinimal30Hari(string $berlaku, string $prefix = ''): void

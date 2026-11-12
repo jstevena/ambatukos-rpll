@@ -22,11 +22,11 @@ $luas = $edit ? rtrim(rtrim((string)$k['luas'], '0'), '.') : '';
     <div class="cols-2">
       <div class="field">
         <label for="biaya_per_bulan">Biaya sewa per bulan (Rp)</label>
-        <input type="number" id="biaya_per_bulan" name="biaya_per_bulan" min="1" step="1" value="<?= e(old('biaya_per_bulan', $edit ? (int)$k['biaya_per_bulan'] : '')) ?>" required>
+        <input type="text" inputmode="numeric" data-rupiah id="biaya_per_bulan" name="biaya_per_bulan" value="<?= e(old('biaya_per_bulan', $edit ? (int)$k['biaya_per_bulan'] : '')) ?>" required>
       </div>
       <div class="field">
         <label for="biaya_per_tahun">Biaya sewa per tahun (Rp)</label>
-        <input type="number" id="biaya_per_tahun" name="biaya_per_tahun" min="1" step="1" value="<?= e(old('biaya_per_tahun', $edit && $k['biaya_per_tahun'] !== null ? (int)$k['biaya_per_tahun'] : '')) ?>">
+        <input type="text" inputmode="numeric" data-rupiah id="biaya_per_tahun" name="biaya_per_tahun" value="<?= e(old('biaya_per_tahun', $edit && $k['biaya_per_tahun'] !== null ? (int)$k['biaya_per_tahun'] : '')) ?>">
         <div class="hint">Boleh dikosongkan.</div>
       </div>
     </div>
