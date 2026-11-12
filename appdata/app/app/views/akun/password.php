@@ -33,6 +33,20 @@
       </form>
     </div>
 
+    <?php $hpTampil = ($noHp ?? '') !== '' ? tampil_hp($noHp) : ''; ?>
+    <div class="card">
+      <h2>Ubah Nomor HP</h2>
+      <form method="post" action="/akun/hp" autocomplete="off">
+        <?= csrf_field() ?>
+        <div class="field">
+          <label for="no_hp">Nomor HP</label>
+          <input type="text" id="no_hp" name="no_hp" inputmode="tel" maxlength="20" value="<?= e(old('no_hp', $hpTampil)) ?>" required>
+          <div class="hint">Boleh diawali 08 atau +62. Disimpan sebagai +62.</div>
+        </div>
+        <button class="btn" type="submit">Simpan Nomor HP</button>
+      </form>
+    </div>
+
     <?php if ($user['peran'] === 'penyewa' && !empty($googleAktif)): ?>
     <div class="card">
       <h2>Akun Google</h2>

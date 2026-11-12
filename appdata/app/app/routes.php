@@ -85,6 +85,7 @@ $r->get('/akun', [AkunController::class, 'form'], $ALL);
 $r->post('/akun/password', [AkunController::class, 'ubahPassword'], $ALL);
 $r->post('/akun/username', [AkunController::class, 'ubahUsername'], $AO);
 $r->post('/akun/nama', [AkunController::class, 'ubahNama'], $ALL);
+$r->post('/akun/hp', [AkunController::class, 'ubahNoHp'], $ALL);
 
 // Notifikasi
 $r->get('/notifikasi', [NotifikasiController::class, 'index'], $ALL);

@@ -179,6 +179,22 @@ class AuthService
         return $u;
     }
 
+    public function noHp(int $idPengguna): ?string
+    {
+        return $this->repo->byId($idPengguna)['no_hp'] ?? null;
+    }
+
+    /** Setiap pengguna dapat mengubah nomor HP-nya sendiri (disimpan dalam format +62). */
+    public function ubahNoHp(int $idPengguna, string $hp): string
+    {
+        $baru = normalisasi_hp(trim($hp));
+        if ($baru === null) {
+            throw new AppException('Nomor HP tidak valid. Gunakan format 08xx atau +62xx.');
+        }
+        $this->repo->update($idPengguna, ['no_hp' => $baru]);
+        return $baru;
+    }
+
     /** Setiap pengguna dapat mengubah namanya sendiri. */
     public function ubahNama(int $idPengguna, string $nama): string
     {

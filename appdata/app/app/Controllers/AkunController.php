@@ -8,7 +8,15 @@ class AkunController extends Controller
         $this->view('akun/password', [
             'title' => 'Akun Saya', 'user' => Auth::user(),
             'googleAktif' => GoogleAuthService::aktif(), 'google' => (new AuthService())->infoGoogle(Auth::id()),
+            'noHp' => (new AuthService())->noHp(Auth::id()),
         ]);
+    }
+
+    public function ubahNoHp(): void
+    {
+        $hp = (new AuthService())->ubahNoHp(Auth::id(), (string)($_POST['no_hp'] ?? ''));
+        flash('success', 'Nomor HP diubah menjadi ' . $hp . '.');
+        $this->redirect('/akun');
     }
 
     public function ubahNama(): void

@@ -237,6 +237,10 @@ td.num,th.num{text-align:right}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none !important}}
 
+@media (max-width:1100px){
+  .top-actions,.pillnav + .top-actions{margin-left:auto}
+}
+
 /* ---------- Performa layar sentuh/tablet: tanpa blur berat agar scroll mulus ---------- */
 @media (max-width:1100px), (pointer:coarse){
   :root{--surface:rgba(255,255,255,.92);--surface-2:rgba(255,255,255,.62)}

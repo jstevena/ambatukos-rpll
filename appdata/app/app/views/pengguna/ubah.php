@@ -12,7 +12,6 @@
 <div class="card form-narrow">
   <dl class="kv" style="margin-bottom:16px">
     <dt>NIK</dt><dd><?= e($u['nik'] ?: '-') ?></dd>
-    <dt>No. HP</dt><dd><?= e(tampil_hp($u['no_hp'])) ?></dd>
   </dl>
   <form method="post" action="/pengguna/<?= (int)$u['id_pengguna'] ?>/ubah" autocomplete="off">
     <?= csrf_field() ?>
@@ -24,6 +23,11 @@
       <label for="username">Username</label>
       <input type="text" id="username" name="username" maxlength="50" value="<?= e(old('username', $u['username'])) ?>" required>
       <div class="hint" id="hUser">4-50 karakter: huruf, angka, titik, garis bawah.</div>
+    </div>
+    <div class="field">
+      <label for="no_hp">Nomor HP</label>
+      <input type="text" id="no_hp" name="no_hp" inputmode="tel" maxlength="20" value="<?= e(old('no_hp', $u['no_hp'] ? tampil_hp($u['no_hp']) : '')) ?>" <?= $u['peran'] === 'penyewa' ? 'required' : '' ?>>
+      <div class="hint">Boleh diawali 08 atau +62. Disimpan sebagai +62.</div>
     </div>
     <?php if ($u['bisa_password']): ?>
     <div class="field">

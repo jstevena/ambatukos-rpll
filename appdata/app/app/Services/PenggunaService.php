@@ -115,12 +115,20 @@ class PenggunaService
         if (mb_strlen($nama) > 100) {
             throw new AppException('Nama maksimal 100 karakter.');
         }
+        $hpMentah = trim((string)($in['no_hp'] ?? ''));
+        $hp = normalisasi_hp($hpMentah);
+        if ($hpMentah === '' && $u['peran'] === 'penyewa') {
+            throw new AppException('Nomor HP wajib diisi untuk penyewa.');
+        }
+        if ($hpMentah !== '' && $hp === null) {
+            throw new AppException('Nomor HP tidak valid. Gunakan format 08xx atau +62xx.');
+        }
         $this->auth->validasiUsername($username);
         $ada = $this->repo->byUsername($username);
         if ($ada !== null && (int)$ada['id_pengguna'] !== $id) {
             throw new AppException('Username sudah dipakai.');
         }
-        $data = ['nama' => $nama, 'username' => $username];
+        $data = ['nama' => $nama, 'username' => $username, 'no_hp' => $hp];
         $password = (string)($in['password'] ?? '');
         if ($u['bisa_password'] && $password !== '') {
             $this->auth->pastikanPasswordKuat($password);
