@@ -47,18 +47,6 @@
       </form>
     </div>
 
-    <?php if ($user['peran'] === 'penyewa' && !empty($googleAktif)): ?>
-    <div class="card">
-      <h2>Akun Google</h2>
-      <?php if ($google['terhubung']): ?>
-        <p style="margin:0">Terhubung dengan <strong><?= e($google['email']) ?></strong>. Anda dapat masuk dengan tombol <em>Masuk dengan Google</em>.</p>
-      <?php else: ?>
-        <p class="muted">Hubungkan akun Google agar bisa masuk tanpa perlu mengingat password.</p>
-        <a class="btn btn-outline" href="/auth/google?mode=tautkan">Hubungkan Google</a>
-      <?php endif; ?>
-    </div>
-    <?php endif; ?>
-
     <?php if ($bisaUsername): ?>
     <div class="card">
       <h2>Ubah Username</h2>
@@ -79,31 +67,45 @@
     <?php endif; ?>
   </div>
 
-  <div class="card">
-    <h2>Ubah Password</h2>
-    <form method="post" action="/akun/password" autocomplete="off">
-      <?= csrf_field() ?>
-      <div class="field">
-        <label for="password_lama">Password saat ini</label>
-        <input type="password" id="password_lama" name="password_lama" autocomplete="current-password" required>
-      </div>
-      <div class="field">
-        <label for="password">Password baru</label>
-        <input type="password" id="password" name="password" maxlength="72" autocomplete="new-password" required>
-        <ul class="pw-rules" id="pwRules">
-          <li data-r="len">Minimal 8 karakter</li>
-          <li data-r="up">Huruf besar (A-Z)</li>
-          <li data-r="low">Huruf kecil (a-z)</li>
-          <li data-r="num">Angka (0-9)</li>
-        </ul>
-      </div>
-      <div class="field">
-        <label for="password2">Ulangi password baru</label>
-        <input type="password" id="password2" name="password2" maxlength="72" autocomplete="new-password" required>
-        <div class="hint" id="hPw2"></div>
-      </div>
-      <button class="btn" type="submit">Simpan Password</button>
-    </form>
+  <div>
+    <div class="card">
+      <h2>Ubah Password</h2>
+      <form method="post" action="/akun/password" autocomplete="off">
+        <?= csrf_field() ?>
+        <div class="field">
+          <label for="password_lama">Password saat ini</label>
+          <input type="password" id="password_lama" name="password_lama" autocomplete="current-password" required>
+        </div>
+        <div class="field">
+          <label for="password">Password baru</label>
+          <input type="password" id="password" name="password" maxlength="72" autocomplete="new-password" required>
+          <ul class="pw-rules" id="pwRules">
+            <li data-r="len">Minimal 8 karakter</li>
+            <li data-r="up">Huruf besar (A-Z)</li>
+            <li data-r="low">Huruf kecil (a-z)</li>
+            <li data-r="num">Angka (0-9)</li>
+          </ul>
+        </div>
+        <div class="field">
+          <label for="password2">Ulangi password baru</label>
+          <input type="password" id="password2" name="password2" maxlength="72" autocomplete="new-password" required>
+          <div class="hint" id="hPw2"></div>
+        </div>
+        <button class="btn" type="submit">Simpan Password</button>
+      </form>
+    </div>
+
+    <?php if ($user['peran'] === 'penyewa' && !empty($googleAktif)): ?>
+    <div class="card">
+      <h2>Akun Google</h2>
+      <?php if ($google['terhubung']): ?>
+        <p style="margin:0">Terhubung dengan <strong><?= e($google['email']) ?></strong>. Anda dapat masuk dengan tombol <em>Masuk dengan Google</em>.</p>
+      <?php else: ?>
+        <p class="muted">Hubungkan akun Google agar bisa masuk tanpa perlu mengingat password.</p>
+        <a class="btn btn-outline" href="/auth/google?mode=tautkan">Hubungkan Google</a>
+      <?php endif; ?>
+    </div>
+    <?php endif; ?>
   </div>
 </div>
 
