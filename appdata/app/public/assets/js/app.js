@@ -110,4 +110,37 @@
     inp.value = fmtRp(inp.value);
     inp.addEventListener('input', function () { inp.value = fmtRp(inp.value); });
   });
+
+  // ---- Nomor HP: cek format langsung (aturan sama dengan server: 08xx = 9-13 digit, atau +628xx) ----
+  var stHp = document.createElement('style');
+  stHp.textContent = '.hint.ok{color:var(--ok)}.hint.bad{color:var(--danger)}';
+  document.head.appendChild(stHp);
+  document.querySelectorAll('input[data-hp]').forEach(function (inp) {
+    var hint = inp.parentNode.querySelector('.hint');
+    if (!hint) return;
+    var DEF = hint.textContent;
+    function normal(v) {
+      var s = v.replace(/[\s().-]/g, '');
+      if (s === '') return '';
+      if (s.indexOf('+62') === 0) return s;
+      if (s.indexOf('62') === 0) return '+' + s;
+      if (s.charAt(0) === '0') return '+62' + s.slice(1);
+      return null;
+    }
+    function cek() {
+      inp.value = inp.value.replace(/[^\d+\s().-]/g, '');          // hanya angka dan pemisah
+      var n = normal(inp.value);
+      if (n === '') { hint.className = 'hint'; hint.textContent = DEF; inp.setCustomValidity(''); return; }
+      var ok = n !== null && /^\+628\d{7,11}$/.test(n);
+      var msg;
+      if (ok) msg = 'Nomor valid: ' + n;
+      else if (n === null || !/^\+628/.test(n)) msg = 'Nomor HP harus diawali 08 atau +62 (nomor seluler).';
+      else msg = 'Nomor HP harus 9-13 digit untuk format 08xx (saat ini ' + (n.length - 2) + ' digit).';
+      hint.className = 'hint ' + (ok ? 'ok' : 'bad');
+      hint.textContent = msg;
+      inp.setCustomValidity(ok ? '' : msg);
+    }
+    inp.addEventListener('input', cek);
+    cek();
+  });
 })();

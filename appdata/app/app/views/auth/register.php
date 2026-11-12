@@ -29,8 +29,8 @@
       </div>
       <div class="field">
         <label for="no_hp">Nomor HP</label>
-        <input type="text" id="no_hp" name="no_hp" inputmode="tel" maxlength="20" value="<?= e(old('no_hp')) ?>" required>
-        <div class="hint">Boleh diawali 08 atau +62. Disimpan sebagai +62.</div>
+        <input type="text" data-hp id="no_hp" name="no_hp" inputmode="tel" maxlength="20" value="<?= e(old('no_hp')) ?>" required>
+        <div class="hint">Boleh diawali 08 atau +62, 9-13 digit (format 08xx). Disimpan sebagai +62.</div>
       </div>
     </div>
     <div class="field">
