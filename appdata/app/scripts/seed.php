@@ -30,11 +30,11 @@ $now = date('Y-m-d H:i:s');
 $buat = static fn(array $d) => $repo->create($d + ['status_akun' => 'aktif', 'created_at' => $now]);
 
 $idPemilik = $buat([
-    'nama' => 'Bu Sari', 'username' => 'ambaperrel', 'password_hash' => password_hash(env('SEED_PEMILIK_PASSWORD', 'pemilik123'), PASSWORD_DEFAULT),
+    'nama' => 'Mas Amba', 'username' => 'ambaperrel', 'password_hash' => password_hash(env('SEED_PEMILIK_PASSWORD', 'pemilik123'), PASSWORD_DEFAULT),
     'no_hp' => '+6281200000001', 'peran' => 'pemilik',
 ]);
 $buat([
-    'nama' => 'Pak Dedi', 'username' => 'rusdiwijaya', 'password_hash' => password_hash(env('SEED_ADMIN_PASSWORD', 'admin123'), PASSWORD_DEFAULT),
+    'nama' => 'Pak Rusdi', 'username' => 'rusdiwijaya', 'password_hash' => password_hash(env('SEED_ADMIN_PASSWORD', 'admin123'), PASSWORD_DEFAULT),
     'no_hp' => '+6281200000002', 'peran' => 'admin',
 ]);
 echo "[seed] akun pemilik & admin dibuat\n";
