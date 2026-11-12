@@ -1,7 +1,10 @@
-<?php $admin = Auth::role() === 'admin'; ?>
+<?php
+$admin = Auth::role() === 'admin';                                   // hanya admin yang mengubah status
+$pengelola = in_array(Auth::role(), ['admin', 'pemilik'], true);      // admin & pemilik dapat membaca semua keluhan
+?>
 <div class="page-head"><div><h1>Keluhan / Perbaikan</h1></div></div>
 
-<?php if (!$admin): ?>
+<?php if (!$pengelola): ?>
   <div class="card form-wide">
     <h2>Ajukan Keluhan</h2>
     <?php if ($kamar === []): ?>
@@ -30,12 +33,12 @@
   <?php else: ?>
   <div class="table-wrap">
     <table class="table-cards">
-      <thead><tr><th>Tanggal</th><?php if ($admin): ?><th>Penyewa</th><?php endif; ?><th>Kamar</th><th>Keluhan</th><th>Status</th></tr></thead>
+      <thead><tr><th>Tanggal</th><?php if ($pengelola): ?><th>Penyewa</th><?php endif; ?><th>Kamar</th><th>Keluhan</th><th>Status</th></tr></thead>
       <tbody>
       <?php foreach ($daftar as $x): ?>
         <tr>
           <td data-label="Tanggal"><?= e(tgl($x['tanggal_lapor'])) ?></td>
-          <?php if ($admin): ?><td data-label="Penyewa"><?= e($x['nama_penyewa']) ?></td><?php endif; ?>
+          <?php if ($pengelola): ?><td data-label="Penyewa"><?= e($x['nama_penyewa']) ?></td><?php endif; ?>
           <td data-label="Kamar"><?= e($x['nomor_kamar']) ?></td>
           <td data-label="Keluhan"><strong><?= e($x['judul']) ?></strong><div class="small muted"><?= nl2br(e($x['deskripsi'])) ?></div></td>
           <td data-label="Status">

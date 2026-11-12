@@ -21,6 +21,18 @@
       <?php if (!$bisaUsername): ?><p class="muted small" style="margin-bottom:0">Username tidak dapat diubah sendiri. Hubungi admin bila perlu menggantinya.</p><?php endif; ?>
     </div>
 
+    <div class="card">
+      <h2>Ubah Nama</h2>
+      <form method="post" action="/akun/nama" autocomplete="off">
+        <?= csrf_field() ?>
+        <div class="field">
+          <label for="nama">Nama lengkap</label>
+          <input type="text" id="nama" name="nama" maxlength="100" value="<?= e(old('nama', $user['nama'])) ?>" required>
+        </div>
+        <button class="btn" type="submit">Simpan Nama</button>
+      </form>
+    </div>
+
     <?php if ($user['peran'] === 'penyewa' && !empty($googleAktif)): ?>
     <div class="card">
       <h2>Akun Google</h2>

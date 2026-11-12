@@ -96,7 +96,7 @@ function menu_for(?string $role): array
             ['Keluhan', '/keluhan'], ['Pengguna', '/pengguna'],
         ],
         'pemilik' => [
-            ['Dashboard', '/dashboard'], ['Kelola Kamar', '/admin/kamar'], ['Kenaikan Sewa', '/pemilik/kenaikan-sewa'], ['Pengguna', '/pengguna'], ['Laporan Pendapatan', '/laporan'],
+            ['Dashboard', '/dashboard'], ['Kelola Kamar', '/admin/kamar'], ['Kenaikan Sewa', '/pemilik/kenaikan-sewa'], ['Keluhan', '/keluhan'], ['Pengguna', '/pengguna'], ['Laporan Pendapatan', '/laporan'],
         ],
         default => [['Daftar Kamar', '/kamar']],
     };
@@ -131,4 +131,35 @@ function link_notifikasi(string $jenis, ?string $peran): string
         'keluhan' => '/keluhan',
         default => '/notifikasi',
     };
+}
+
+/**
+ * Normalisasi nomor HP Indonesia ke format +62.
+ * Menerima 08xx..., 628xx..., atau +628xx... (spasi/strip diabaikan). Mengembalikan null bila tidak valid.
+ */
+function normalisasi_hp(?string $hp): ?string
+{
+    $s = preg_replace('/[\s().-]/', '', (string)$hp);
+    if ($s === '') {
+        return null;
+    }
+    if (str_starts_with($s, '+62')) {
+        $n = $s;
+    } elseif (str_starts_with($s, '62')) {
+        $n = '+' . $s;
+    } elseif (str_starts_with($s, '0')) {
+        $n = '+62' . substr($s, 1);
+    } else {
+        return null;
+    }
+    return preg_match('/^\+628[0-9]{7,11}$/', $n) ? $n : null;
+}
+
+/** Nomor HP untuk ditampilkan: selalu +62 bila memungkinkan. */
+function tampil_hp(?string $hp): string
+{
+    if ($hp === null || $hp === '') {
+        return '-';
+    }
+    return normalisasi_hp($hp) ?? $hp;
 }

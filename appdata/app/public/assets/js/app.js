@@ -71,4 +71,33 @@
     kunj.setCustomValidity(kunj.value && masuk.value && kunj.value > masuk.value ? 'Tanggal kunjungan harus sebelum atau sama dengan tanggal masuk.' : '');
   }
   if (kunj && masuk) { kunj.addEventListener('change', syncTanggal); masuk.addEventListener('change', syncTanggal); syncTanggal(); }
+
+  // ---- Tombol lihat/sembunyikan password pada semua kolom password ----
+  var st = document.createElement('style');
+  st.textContent = '.pw-wrap{position:relative}.pw-wrap input{padding-right:46px}'
+    + '.pw-toggle{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:0;background:transparent;color:var(--muted);cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0}'
+    + '.pw-toggle:hover{color:var(--accent);background:var(--accent-soft)}'
+    + '.pw-toggle svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}'
+    + '.pw-toggle .eye-off{display:none}.pw-toggle.show .eye{display:none}.pw-toggle.show .eye-off{display:block}';
+  document.head.appendChild(st);
+  var ICON = '<svg class="eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>'
+    + '<svg class="eye-off" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4M6.5 6.5C3.8 8.3 2 12 2 12s3.5 7 10 7c1.6 0 3-.4 4.3-1M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+  document.querySelectorAll('input[type="password"]').forEach(function (inp) {
+    var wrap = document.createElement('div');
+    wrap.className = 'pw-wrap';
+    inp.parentNode.insertBefore(wrap, inp);
+    wrap.appendChild(inp);
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pw-toggle';
+    b.setAttribute('aria-label', 'Tampilkan password');
+    b.innerHTML = ICON;
+    b.addEventListener('click', function () {
+      var tampil = inp.type === 'password';
+      inp.type = tampil ? 'text' : 'password';
+      b.classList.toggle('show', tampil);
+      b.setAttribute('aria-label', tampil ? 'Sembunyikan password' : 'Tampilkan password');
+    });
+    wrap.appendChild(b);
+  });
 })();

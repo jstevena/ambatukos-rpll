@@ -41,7 +41,7 @@ $warna = ['penyewa' => 'gray', 'admin' => 'info', 'pemilik' => 'ok'];
           <td data-label="Nama"><strong><?= e($u['nama']) ?></strong></td>
           <td data-label="Username"><?= e($u['username']) ?></td>
           <td data-label="Peran"><?= $mantan ? badge('Mantan Penyewa', 'gray') : badge($label[$u['peran']] ?? $u['peran'], $warna[$u['peran']] ?? 'gray') ?></td>
-          <td data-label="No. HP"><?= e($u['no_hp'] ?: '-') ?></td>
+          <td data-label="No. HP"><?= e(tampil_hp($u['no_hp'])) ?></td>
           <td data-label="NIK"><?= e($u['nik'] ?: '-') ?></td>
           <td data-label="Terdaftar"><?= e(tgl($u['created_at'])) ?></td>
           <td data-label="Status"><?= badge($u['status_akun'] === 'aktif' ? 'Aktif' : 'Nonaktif', $u['status_akun'] === 'aktif' ? 'ok' : 'gray') ?></td>
@@ -54,7 +54,7 @@ $warna = ['penyewa' => 'gray', 'admin' => 'info', 'pemilik' => 'ok'];
               <span class="muted small">Data pribadi sudah dihapus</span>
             <?php else: ?>
               <div class="row-actions">
-                <?php if ($u['peran'] === 'penyewa'): ?>
+                <?php if ($u['peran'] === 'penyewa' || ($u['peran'] === 'admin' && $myRole === 'pemilik')): ?>
                   <a class="btn btn-outline btn-sm" href="/pengguna/<?= (int)$u['id_pengguna'] ?>/ubah">Ubah</a>
                 <?php endif; ?>
                 <form method="post" action="/pengguna/<?= (int)$u['id_pengguna'] ?>/status">

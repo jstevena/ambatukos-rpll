@@ -75,7 +75,7 @@ $r->get('/laporan', [LaporanController::class, 'index'], $O);
 $r->get('/laporan/unduh', [LaporanController::class, 'unduh'], $O);
 
 // Keluhan
-$r->get('/keluhan', [KeluhanController::class, 'index'], ['penyewa', 'admin']);
+$r->get('/keluhan', [KeluhanController::class, 'index'], ['penyewa', 'admin', 'pemilik']);
 $r->post('/keluhan', [KeluhanController::class, 'ajukan'], $P);
 $r->post('/keluhan/{id}/status', [KeluhanController::class, 'ubahStatus'], $A);
 
@@ -83,6 +83,7 @@ $r->post('/keluhan/{id}/status', [KeluhanController::class, 'ubahStatus'], $A);
 $r->get('/akun', [AkunController::class, 'form'], $ALL);
 $r->post('/akun/password', [AkunController::class, 'ubahPassword'], $ALL);
 $r->post('/akun/username', [AkunController::class, 'ubahUsername'], $AO);
+$r->post('/akun/nama', [AkunController::class, 'ubahNama'], $ALL);
 
 // Notifikasi
 $r->get('/notifikasi', [NotifikasiController::class, 'index'], $ALL);

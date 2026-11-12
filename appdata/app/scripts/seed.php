@@ -30,12 +30,12 @@ $now = date('Y-m-d H:i:s');
 $buat = static fn(array $d) => $repo->create($d + ['status_akun' => 'aktif', 'created_at' => $now]);
 
 $idPemilik = $buat([
-    'nama' => 'Mas Amba Perrel', 'username' => 'ambaperrel', 'password_hash' => password_hash(env('SEED_PEMILIK_PASSWORD', 'pemilik123'), PASSWORD_DEFAULT),
-    'no_hp' => '081200000001', 'peran' => 'pemilik',
+    'nama' => 'Bu Sari', 'username' => 'pemilik', 'password_hash' => password_hash(env('SEED_PEMILIK_PASSWORD', 'pemilik123'), PASSWORD_DEFAULT),
+    'no_hp' => '+6281200000001', 'peran' => 'pemilik',
 ]);
 $buat([
-    'nama' => 'Pak Rusdi Wijaya', 'username' => 'rusdiwijaya', 'password_hash' => password_hash(env('SEED_ADMIN_PASSWORD', 'admin123'), PASSWORD_DEFAULT),
-    'no_hp' => '081200000002', 'peran' => 'admin',
+    'nama' => 'Pak Dedi', 'username' => 'admin', 'password_hash' => password_hash(env('SEED_ADMIN_PASSWORD', 'admin123'), PASSWORD_DEFAULT),
+    'no_hp' => '+6281200000002', 'peran' => 'admin',
 ]);
 echo "[seed] akun pemilik & admin dibuat\n";
 
@@ -46,7 +46,7 @@ $aktif = static fn(string $key): bool => strtolower((string)env($key, env('SEED_
 if ($aktif('SEED_PENYEWA')) {
     $buat([
         'nama' => 'Andi Pratama', 'username' => 'andi', 'password_hash' => password_hash(env('SEED_PENYEWA_PASSWORD', 'penyewa123'), PASSWORD_DEFAULT),
-        'no_hp' => '081200000003', 'nik' => '3273010101010001', 'alamat' => 'Jl. Contoh No. 1, Bandung', 'peran' => 'penyewa',
+        'no_hp' => '+6281200000003', 'nik' => '3273010101010001', 'peran' => 'penyewa',
     ]);
     echo "[seed] penyewa demo (andi) dibuat\n";
 }

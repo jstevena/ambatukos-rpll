@@ -132,7 +132,7 @@ class PenggunaRepository extends Repository
     {
         Database::exec('DELETE FROM notifikasi WHERE id_pengguna = ?', [$id]);
         Database::exec(
-            "UPDATE pengguna SET nama = ?, username = ?, password_hash = ?, no_hp = NULL, nik = NULL, alamat = NULL, status_akun = 'nonaktif'
+            "UPDATE pengguna SET nama = ?, username = ?, password_hash = ?, no_hp = NULL, nik = NULL, status_akun = 'nonaktif'
               WHERE id_pengguna = ?",
             ['Mantan Penyewa #' . $id, 'terhapus_' . $id, password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT), $id]
         );

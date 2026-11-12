@@ -35,12 +35,12 @@ class PenggunaController extends Controller
 
     public function formUbah(string $id): void
     {
-        $this->view('pengguna/ubah', ['title' => 'Ubah Akun Penyewa', 'u' => $this->svc->penyewaUntukDiubah((int)$id)]);
+        $this->view('pengguna/ubah', ['title' => 'Ubah Akun', 'u' => $this->svc->targetUntukDiubah((string)Auth::role(), (int)$id)]);
     }
 
     public function ubah(string $id): void
     {
-        $nama = $this->svc->ubahKredensialPenyewa((int)$id, $this->input('username'), (string)($_POST['password'] ?? ''));
+        $nama = $this->svc->ubahAkun((string)Auth::role(), (int)$id, $_POST);
         flash('success', 'Akun "' . $nama . '" diperbarui.');
         $this->redirect('/pengguna');
     }

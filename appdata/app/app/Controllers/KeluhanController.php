@@ -13,7 +13,7 @@ class KeluhanController extends Controller
     /** UI-14 Keluhan / Perbaikan. */
     public function index(): void
     {
-        if (Auth::role() === 'admin') {
+        if (in_array(Auth::role(), ['admin', 'pemilik'], true)) {
             $this->view('keluhan/index', ['title' => 'Keluhan', 'daftar' => $this->svc->semua(), 'kamar' => []]);
             return;
         }

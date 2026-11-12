@@ -13,7 +13,6 @@ CREATE TABLE pengguna (
   password_hash VARCHAR(255) NOT NULL,
   no_hp         VARCHAR(20)  NULL,
   nik           VARCHAR(16)  NULL,
-  alamat        VARCHAR(255) NULL,
   peran         ENUM('penyewa','admin','pemilik') NOT NULL DEFAULT 'penyewa',
   status_akun   ENUM('aktif','nonaktif') NOT NULL DEFAULT 'aktif',
   created_at    DATETIME NOT NULL,

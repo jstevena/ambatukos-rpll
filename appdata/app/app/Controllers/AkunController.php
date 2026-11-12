@@ -11,6 +11,14 @@ class AkunController extends Controller
         ]);
     }
 
+    public function ubahNama(): void
+    {
+        $nama = (new AuthService())->ubahNama(Auth::id(), (string)($_POST['nama'] ?? ''));
+        $_SESSION['user']['nama'] = $nama;
+        flash('success', 'Nama berhasil diubah.');
+        $this->redirect('/akun');
+    }
+
     public function ubahUsername(): void
     {
         $baru = (new AuthService())->ubahUsername(Auth::id(), (string)($_POST['username'] ?? ''), (string)($_POST['password_lama'] ?? ''));

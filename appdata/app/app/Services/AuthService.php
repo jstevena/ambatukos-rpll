@@ -16,10 +16,11 @@ class AuthService
         $nama = trim((string)($in['nama'] ?? ''));
         $username = trim((string)($in['username'] ?? ''));
         $password = (string)($in['password'] ?? '');
-        $noHp = preg_replace('/[\s-]/', '', (string)($in['no_hp'] ?? ''));
+        $hpMentah = trim((string)($in['no_hp'] ?? ''));
+        $noHp = normalisasi_hp($hpMentah);
         $nik = trim((string)($in['nik'] ?? ''));
 
-        if ($nama === '' || $username === '' || $password === '' || $noHp === '' || $nik === '') {
+        if ($nama === '' || $username === '' || $password === '' || $hpMentah === '' || $nik === '') {
             throw new AppException('Semua kolom wajib diisi.');
         }
         if (mb_strlen($nama) > 100) {
@@ -32,8 +33,8 @@ class AuthService
         if ($password !== (string)($in['password2'] ?? '')) {
             throw new AppException('Konfirmasi password tidak sama.');
         }
-        if (!preg_match('/^[0-9+]{8,20}$/', $noHp)) {
-            throw new AppException('Nomor HP tidak valid.');
+        if ($noHp === null) {
+            throw new AppException('Nomor HP tidak valid. Gunakan format 08xx atau +62xx.');
         }
         if (!preg_match('/^[0-9]{16}$/', $nik)) {
             throw new AppException('NIK harus 16 digit angka.');
@@ -129,16 +130,17 @@ class AuthService
     public function daftarDariGoogle(array $pending, array $in): array
     {
         $nama = trim((string)($in['nama'] ?? ''));
-        $noHp = preg_replace('/[\s-]/', '', (string)($in['no_hp'] ?? ''));
+        $hpMentah = trim((string)($in['no_hp'] ?? ''));
+        $noHp = normalisasi_hp($hpMentah);
         $nik = trim((string)($in['nik'] ?? ''));
-        if ($nama === '' || $noHp === '' || $nik === '') {
+        if ($nama === '' || $hpMentah === '' || $nik === '') {
             throw new AppException('Semua kolom wajib diisi.');
         }
         if (mb_strlen($nama) > 100) {
             throw new AppException('Nama maksimal 100 karakter.');
         }
-        if (!preg_match('/^[0-9+]{8,20}$/', $noHp)) {
-            throw new AppException('Nomor HP tidak valid.');
+        if ($noHp === null) {
+            throw new AppException('Nomor HP tidak valid. Gunakan format 08xx atau +62xx.');
         }
         if (!preg_match('/^[0-9]{16}$/', $nik)) {
             throw new AppException('NIK harus 16 digit angka.');
@@ -175,6 +177,20 @@ class AuthService
             $u = $base . random_int(100, 9999);
         }
         return $u;
+    }
+
+    /** Setiap pengguna dapat mengubah namanya sendiri. */
+    public function ubahNama(int $idPengguna, string $nama): string
+    {
+        $nama = trim($nama);
+        if ($nama === '') {
+            throw new AppException('Nama tidak boleh kosong.');
+        }
+        if (mb_strlen($nama) > 100) {
+            throw new AppException('Nama maksimal 100 karakter.');
+        }
+        $this->repo->update($idPengguna, ['nama' => $nama]);
+        return $nama;
     }
 
     public function validasiUsername(string $username): void
