@@ -1,6 +1,5 @@
 <?php
-$admin = Auth::role() === 'admin';                                   // hanya admin yang mengubah status
-$pengelola = in_array(Auth::role(), ['admin', 'pemilik'], true);      // admin & pemilik dapat membaca semua keluhan
+$pengelola = in_array(Auth::role(), ['admin', 'pemilik'], true);      // admin & pemilik kelola keluhan
 ?>
 <div class="page-head"><div><h1>Keluhan / Perbaikan</h1></div></div>
 
@@ -46,7 +45,7 @@ $pengelola = in_array(Auth::role(), ['admin', 'pemilik'], true);      // admin &
           <td data-label="Kamar"><?= e($x['nomor_kamar']) ?></td>
           <td data-label="Keluhan"><strong><?= e($x['judul']) ?></strong><div class="small muted"><?= nl2br(e($x['deskripsi'])) ?></div></td>
           <td data-label="Status">
-            <?php if ($admin): ?>
+            <?php if ($pengelola): ?>
               <form method="post" action="/keluhan/<?= (int)$x['id_keluhan'] ?>/status" class="row-actions">
                 <?= csrf_field() ?>
                 <select name="status" style="width:auto">

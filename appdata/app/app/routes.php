@@ -78,7 +78,7 @@ $r->get('/laporan/unduh', [LaporanController::class, 'unduh'], $O);
 // Keluhan
 $r->get('/keluhan', [KeluhanController::class, 'index'], ['penyewa', 'admin', 'pemilik']);
 $r->post('/keluhan', [KeluhanController::class, 'ajukan'], $P);
-$r->post('/keluhan/{id}/status', [KeluhanController::class, 'ubahStatus'], $A);
+$r->post('/keluhan/{id}/status', [KeluhanController::class, 'ubahStatus'], $AO);
 
 // Akun saya (semua peran)
 $r->get('/akun', [AkunController::class, 'form'], $ALL);
