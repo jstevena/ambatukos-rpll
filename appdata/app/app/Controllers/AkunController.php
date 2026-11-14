@@ -5,10 +5,12 @@ class AkunController extends Controller
 {
     public function form(): void
     {
+        $authService = new AuthService();
         $this->view('akun/password', [
             'title' => 'Akun Saya', 'user' => Auth::user(),
-            'googleAktif' => GoogleAuthService::aktif(), 'google' => (new AuthService())->infoGoogle(Auth::id()),
-            'noHp' => (new AuthService())->noHp(Auth::id()),
+            'googleAktif' => GoogleAuthService::aktif(), 'google' => $authService->infoGoogle(Auth::id()),
+            'noHp' => $authService->noHp(Auth::id()),
+            'passwordDiatur' => $authService->sudahAturPassword(Auth::id()),
         ]);
     }
 
@@ -44,6 +46,17 @@ class AkunController extends Controller
             (string)($_POST['password2'] ?? '')
         );
         flash('success', 'Password berhasil diubah.');
+        $this->redirect('/akun');
+    }
+
+    public function aturPassword(): void
+    {
+        (new AuthService())->aturPassword(
+            Auth::id(),
+            (string)($_POST['password'] ?? ''),
+            (string)($_POST['password2'] ?? '')
+        );
+        flash('success', 'Password berhasil diatur. Anda sekarang bisa masuk dengan email dan password.');
         $this->redirect('/akun');
     }
 }

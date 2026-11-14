@@ -6,11 +6,11 @@
 </style>
 <div class="card auth-card">
   <h1>Masuk</h1>
-  <p class="muted">Masuk dengan username dan password Anda.</p>
+  <p class="muted">Masuk dengan username/email dan password Anda.</p>
   <form method="post" action="/login" autocomplete="on">
     <?= csrf_field() ?>
     <div class="field">
-      <label for="username">Username</label>
+      <label for="username">Username atau Email</label>
       <input type="text" id="username" name="username" value="<?= e(old('username')) ?>" required autofocus>
     </div>
     <div class="field">

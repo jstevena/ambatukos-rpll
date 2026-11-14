@@ -83,6 +83,31 @@ class AuthService
         $this->repo->updatePassword($idPengguna, password_hash($baru, PASSWORD_DEFAULT));
     }
 
+    /** Atur password pertama kali untuk user Google yang belum pernah set password. */
+    public function aturPassword(int $idPengguna, string $baru, string $konfirmasi): void
+    {
+        $u = $this->repo->byId($idPengguna);
+        if ($u === null) {
+            throw new AppException('Akun tidak ditemukan.');
+        }
+        if (!empty($u['password_diatur'])) {
+            throw new AppException('Password sudah pernah diatur. Gunakan ubah password.');
+        }
+        if ($baru !== $konfirmasi) {
+            throw new AppException('Konfirmasi password tidak sama.');
+        }
+        $this->pastikanPasswordKuat($baru);
+        $this->repo->updatePassword($idPengguna, password_hash($baru, PASSWORD_DEFAULT));
+        $this->repo->update($idPengguna, ['password_diatur' => 1]);
+    }
+
+    /** Cek apakah pengguna sudah mengatur password sendiri. */
+    public function sudahAturPassword(int $idPengguna): bool
+    {
+        $u = $this->repo->byId($idPengguna);
+        return $u !== null && !empty($u['password_diatur']);
+    }
+
     // ---------- Login Google ----------
 
     public function cariDariGoogle(string $sub): ?array
@@ -152,7 +177,8 @@ class AuthService
             $id = $this->repo->create([
                 'nama' => $nama, 'username' => $this->usernameDariEmail($pending['email']),
                 'email' => $pending['email'], 'google_id' => $pending['sub'],
-                'password_hash' => password_hash(bin2hex(random_bytes(24)), PASSWORD_DEFAULT), // tidak dapat dipakai login
+                'password_hash' => password_hash(bin2hex(random_bytes(24)), PASSWORD_DEFAULT),
+                'password_diatur' => 0,
                 'no_hp' => $noHp, 'nik' => $nik,
                 'peran' => 'penyewa', 'status_akun' => 'aktif', 'created_at' => date('Y-m-d H:i:s'),
             ]);
@@ -246,12 +272,15 @@ class AuthService
         return $usernameBaru;
     }
 
-    /** UC-02 Login: verifikasi hash, cek status akun, kembalikan data pengguna. */
+    /** UC-02 Login: verifikasi hash, cek status akun, kembalikan data pengguna. Menerima username atau email. */
     public function autentikasi(string $username, string $password): array
     {
-        $u = $this->repo->byUsername(trim($username));
-        if ($u === null || !password_verify($password, $u['password_hash'])) {
-            throw new AppException('Username atau password salah.');
+        $input = trim($username);
+        $u = str_contains($input, '@')
+            ? $this->repo->byEmail($input)
+            : $this->repo->byUsername($input);
+        if ($u === null || empty($u['password_diatur']) || !password_verify($password, $u['password_hash'])) {
+            throw new AppException('Username/email atau password salah.');
         }
         if ($u['status_akun'] !== 'aktif') {
             throw new AppException('Akun belum aktif. Hubungi pengelola kos.');

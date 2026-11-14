@@ -83,6 +83,7 @@ $r->post('/keluhan/{id}/status', [KeluhanController::class, 'ubahStatus'], $A);
 // Akun saya (semua peran)
 $r->get('/akun', [AkunController::class, 'form'], $ALL);
 $r->post('/akun/password', [AkunController::class, 'ubahPassword'], $ALL);
+$r->post('/akun/atur-password', [AkunController::class, 'aturPassword'], $ALL);
 $r->post('/akun/username', [AkunController::class, 'ubahUsername'], $AO);
 $r->post('/akun/nama', [AkunController::class, 'ubahNama'], $ALL);
 $r->post('/akun/hp', [AkunController::class, 'ubahNoHp'], $ALL);

@@ -68,6 +68,7 @@
   </div>
 
   <div>
+    <?php if (!empty($passwordDiatur)): ?>
     <div class="card">
       <h2>Ubah Password</h2>
       <form method="post" action="/akun/password" autocomplete="off">
@@ -94,6 +95,31 @@
         <button class="btn" type="submit">Simpan Password</button>
       </form>
     </div>
+    <?php else: ?>
+    <div class="card">
+      <h2>Atur Password</h2>
+      <p class="muted">Anda masuk lewat Google dan belum mengatur password. Atur password agar bisa masuk dengan email dan password juga.</p>
+      <form method="post" action="/akun/atur-password" autocomplete="off">
+        <?= csrf_field() ?>
+        <div class="field">
+          <label for="password">Password baru</label>
+          <input type="password" id="password" name="password" maxlength="72" autocomplete="new-password" required>
+          <ul class="pw-rules" id="pwRules">
+            <li data-r="len">Minimal 8 karakter</li>
+            <li data-r="up">Huruf besar (A-Z)</li>
+            <li data-r="low">Huruf kecil (a-z)</li>
+            <li data-r="num">Angka (0-9)</li>
+          </ul>
+        </div>
+        <div class="field">
+          <label for="password2">Ulangi password</label>
+          <input type="password" id="password2" name="password2" maxlength="72" autocomplete="new-password" required>
+          <div class="hint" id="hPw2"></div>
+        </div>
+        <button class="btn" type="submit">Simpan Password</button>
+      </form>
+    </div>
+    <?php endif; ?>
 
     <?php if ($user['peran'] === 'penyewa' && !empty($googleAktif)): ?>
     <div class="card">
@@ -136,7 +162,7 @@
     var r = { len: v.length >= 8, up: /[A-Z]/.test(v), low: /[a-z]/.test(v), num: /[0-9]/.test(v) };
     var all = true;
     rules.forEach(function (li) { var ok = r[li.getAttribute('data-r')]; li.classList.toggle('ok', ok); if (!ok) all = false; });
-    var sama = v !== '' && v === lama.value;
+    var sama = lama && v !== '' && v === lama.value;
     p.setCustomValidity(!all ? 'Password belum memenuhi semua syarat.' : (sama ? 'Password baru harus berbeda dari password saat ini.' : ''));
     cekPassword2();
   }
@@ -146,7 +172,8 @@
     hint(hP2, ok ? 'ok' : 'bad', ok ? 'Password cocok.' : 'Password tidak sama.');
     p2.setCustomValidity(ok ? '' : 'Password tidak sama.');
   }
-  lama.addEventListener('input', cekPassword); p.addEventListener('input', cekPassword); p2.addEventListener('input', cekPassword2);
+  if (lama) lama.addEventListener('input', cekPassword);
+  p.addEventListener('input', cekPassword); p2.addEventListener('input', cekPassword2);
   cekPassword();
 })();
 </script>
