@@ -15,11 +15,16 @@ class AuthController extends Controller
         if (Auth::check()) {
             $this->redirect(Auth::home());
         }
-        $this->view('auth/login', ['title' => 'Masuk', 'googleAktif' => GoogleAuthService::aktif()]);
+        $this->view('auth/login', [
+            'title' => 'Masuk',
+            'googleAktif' => GoogleAuthService::aktif(),
+            'turnstileSiteKey' => TurnstileService::siteKey(),
+        ]);
     }
 
     public function login(): void
     {
+        (new TurnstileService())->pastikanValid((string)($_POST['cf-turnstile-response'] ?? ''));
         $u = $this->auth->autentikasi((string)($_POST['username'] ?? ''), (string)($_POST['password'] ?? ''));
         Auth::login($u);
         flash('success', 'Selamat datang, ' . $u['nama'] . '.');
@@ -31,11 +36,16 @@ class AuthController extends Controller
         if (Auth::check()) {
             $this->redirect(Auth::home());
         }
-        $this->view('auth/register', ['title' => 'Daftar Akun', 'googleAktif' => GoogleAuthService::aktif()]);
+        $this->view('auth/register', [
+            'title' => 'Daftar Akun',
+            'googleAktif' => GoogleAuthService::aktif(),
+            'turnstileSiteKey' => TurnstileService::siteKey(),
+        ]);
     }
 
     public function registrasi(): void
     {
+        (new TurnstileService())->pastikanValid((string)($_POST['cf-turnstile-response'] ?? ''));
         $this->auth->registrasi($_POST);
         flash('success', 'Registrasi berhasil. Silakan masuk dengan akun Anda.');
         $this->redirect('/login');

@@ -55,8 +55,14 @@
         <div class="hint" id="hPw2"></div>
       </div>
     </div>
+    <?php if (!empty($turnstileSiteKey)): ?>
+      <div class="cf-turnstile" data-sitekey="<?= e($turnstileSiteKey) ?>" data-theme="auto" style="margin:14px 0"></div>
+    <?php endif; ?>
     <button class="btn" type="submit" style="width:100%">Daftar</button>
   </form>
+  <?php if (!empty($turnstileSiteKey)): ?>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <?php endif; ?>
   <?php if (!empty($googleAktif)): ?>
     <div class="g-divider"><span>atau</span></div>
     <a class="btn-google" href="/auth/google">
