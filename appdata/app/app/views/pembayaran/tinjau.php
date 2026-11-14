@@ -20,7 +20,9 @@
         <dt>Penyewa</dt><dd><?= e($pb['nama_penyewa']) ?> <small>(<?= e($pb['no_hp']) ?>)</small></dd>
         <dt>Kamar</dt><dd><?= e($pb['nomor_kamar']) ?></dd>
         <dt>Jenis</dt><dd><?= e($pb['jenis']) ?><?= $pb['periode_ke'] ? ' #' . (int)$pb['periode_ke'] : '' ?></dd>
-        <dt>Nominal tagihan</dt><dd><strong style="font-size:18px;color:var(--primer)"><?= rupiah($pb['jumlah_tagihan']) ?></strong></dd>
+        <dt>Tagihan pokok</dt><dd><?= rupiah($pb['jumlah_tagihan']) ?></dd>
+        <?php if ((float)$pb['denda'] > 0): ?><dt>Denda</dt><dd style="color:var(--danger)"><?= rupiah($pb['denda']) ?></dd><?php endif; ?>
+        <dt>Total dibayar</dt><dd><strong style="font-size:18px;color:var(--primer)"><?= rupiah($pb['jumlah']) ?></strong></dd>
         <dt>Jatuh tempo</dt><dd><?= e(tgl($pb['jatuh_tempo'])) ?></dd>
         <dt>Diunggah</dt><dd><?= e(tgl($pb['tanggal_bayar'], true)) ?></dd>
         <dt>Pemesanan</dt><dd><?= badge($pb['status_pemesanan']) ?></dd>

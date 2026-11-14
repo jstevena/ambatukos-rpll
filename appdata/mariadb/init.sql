@@ -15,6 +15,8 @@ CREATE TABLE pengguna (
   nik           VARCHAR(16)  NULL,
   peran         ENUM('penyewa','admin','pemilik') NOT NULL DEFAULT 'penyewa',
   status_akun   ENUM('aktif','nonaktif') NOT NULL DEFAULT 'aktif',
+  blacklist     TINYINT(1) NOT NULL DEFAULT 0,
+  catatan_blacklist VARCHAR(255) NULL,
   created_at    DATETIME NOT NULL,
   UNIQUE KEY uq_pengguna_username (username),
   UNIQUE KEY uq_pengguna_email (email),
@@ -77,6 +79,7 @@ CREATE TABLE tagihan (
   jatuh_tempo        DATETIME NOT NULL,
   status             ENUM('Belum Dibayar','Menunggu Verifikasi','Lunas','Terlambat','Dibatalkan') NOT NULL DEFAULT 'Belum Dibayar',
   pengingat_terkirim TINYINT(1) NOT NULL DEFAULT 0,
+  pengingat_terakhir DATE NULL,
   -- Penerbitan tidak ganda (Tabel 5.14)
   UNIQUE KEY uq_tagihan_terbit (id_pemesanan, jenis, periode_ke),
   KEY idx_tagihan_status (status),
@@ -139,4 +142,36 @@ CREATE TABLE keluhan (
   CONSTRAINT fk_keluhan_penyewa FOREIGN KEY (id_penyewa) REFERENCES pengguna (id_pengguna) ON DELETE RESTRICT,
   CONSTRAINT fk_keluhan_kamar   FOREIGN KEY (id_kamar)   REFERENCES kamar (id_kamar)       ON DELETE RESTRICT,
   CONSTRAINT fk_keluhan_admin   FOREIGN KEY (id_admin)   REFERENCES pengguna (id_pengguna) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Pengaturan aplikasi (fasilitas umum, aturan denda)
+CREATE TABLE pengaturan (
+  kunci VARCHAR(50) NOT NULL PRIMARY KEY,
+  nilai TEXT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Denda keterlambatan: item terpisah dari harga sewa pokok
+CREATE TABLE tagihan_denda (
+  id_denda          INT AUTO_INCREMENT PRIMARY KEY,
+  id_tagihan        INT NOT NULL,
+  jumlah            DECIMAL(12,2) NOT NULL DEFAULT 0,
+  hari              INT NOT NULL DEFAULT 0,
+  terakhir_dihitung DATE NOT NULL,
+  UNIQUE KEY uq_denda_tagihan (id_tagihan),
+  CONSTRAINT fk_denda_tagihan FOREIGN KEY (id_tagihan) REFERENCES tagihan (id_tagihan) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Janji bayar (promise to pay)
+CREATE TABLE janji_bayar (
+  id_janji       INT AUTO_INCREMENT PRIMARY KEY,
+  id_tagihan     INT NOT NULL,
+  id_admin       INT NULL,
+  tanggal_janji  DATE NOT NULL,
+  alasan         VARCHAR(255) NOT NULL,
+  status         ENUM('Diajukan','Disetujui','Ditolak') NOT NULL DEFAULT 'Diajukan',
+  catatan_admin  VARCHAR(255) NULL,
+  tanggal_ajukan DATETIME NOT NULL,
+  KEY idx_janji_status (status),
+  CONSTRAINT fk_janji_tagihan FOREIGN KEY (id_tagihan) REFERENCES tagihan (id_tagihan)  ON DELETE RESTRICT,
+  CONSTRAINT fk_janji_admin   FOREIGN KEY (id_admin)   REFERENCES pengguna (id_pengguna) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

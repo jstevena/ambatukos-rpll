@@ -92,4 +92,20 @@ $r->get('/notifikasi', [NotifikasiController::class, 'index'], $ALL);
 $r->post('/notifikasi/baca-semua', [NotifikasiController::class, 'bacaSemua'], $ALL);
 $r->post('/notifikasi/baca/{id}', [NotifikasiController::class, 'baca'], $ALL);
 
+// Fasilitas umum (pemilik) & pengaturan denda (admin)
+$r->get('/pemilik/fasilitas', [PengaturanController::class, 'fasilitas'], $O);
+$r->post('/pemilik/fasilitas', [PengaturanController::class, 'simpanFasilitas'], $O);
+$r->get('/admin/denda', [PengaturanController::class, 'denda'], $A);
+$r->post('/admin/denda', [PengaturanController::class, 'simpanDenda'], $A);
+
+// Janji bayar
+$r->get('/pembayaran/janji/{id}', [JanjiBayarController::class, 'form'], $P);
+$r->post('/pembayaran/janji/{id}', [JanjiBayarController::class, 'ajukan'], $P);
+$r->post('/admin/janji/{id}/setujui', [JanjiBayarController::class, 'setujui'], $A);
+$r->post('/admin/janji/{id}/tolak', [JanjiBayarController::class, 'tolak'], $A);
+
+// Putus sewa sepihak (admin) & blacklist
+$r->post('/admin/pemesanan/{id}/putus', [PemesananController::class, 'putus'], $A);
+$r->post('/pengguna/{id}/blacklist', [PenggunaController::class, 'blacklist'], $AO);
+
 return $r;

@@ -22,7 +22,6 @@ $dp = round((float)$k['biaya_sekarang'] * $dpPersen / 100);
     <h2>Informasi Kamar</h2>
     <dl class="kv">
       <dt>Luas</dt><dd><?= e(rtrim(rtrim((string)$k['luas'], '0'), '.')) ?> m&sup2;</dd>
-      <dt>Jenis sewa</dt><dd><?= e(ucfirst($k['jenis_sewa'])) ?></dd>
       <dt>Biaya per bulan</dt><dd><strong><?= rupiah($k['biaya_sekarang']) ?></strong></dd>
       <dt>Biaya per tahun</dt><dd><?= $k['biaya_per_tahun'] !== null ? rupiah($k['biaya_per_tahun']) : '-' ?></dd>
       <dt>Status</dt><dd><?= badge($k['status']) ?></dd>

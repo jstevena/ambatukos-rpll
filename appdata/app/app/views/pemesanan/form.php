@@ -1,6 +1,5 @@
 <?php
 $hariIni = date('Y-m-d');
-$js = old('jenis_sewa', $k['jenis_sewa']);
 ?>
 <p class="small"><a href="/kamar/<?= (int)$k['id_kamar'] ?>">&larr; Detail kamar</a></p>
 <div class="page-head"><h1>Pesan Kamar <?= e($k['nomor_kamar']) ?></h1></div>
@@ -34,18 +33,7 @@ $js = old('jenis_sewa', $k['jenis_sewa']);
         <input type="date" id="tanggal_masuk" name="tanggal_masuk" min="<?= $hariIni ?>" value="<?= e(old('tanggal_masuk')) ?>" required>
         <div class="hint">Menjadi tanggal mulai sewa dan batas pelunasan.</div>
       </div>
-      <div class="field">
-        <label>Jenis sewa</label>
-        <div class="radio-row">
-          <label><input type="radio" name="jenis_sewa" value="tetap" <?= $js === 'tetap' ? 'checked' : '' ?>> Tetap (berlanjut tiap bulan)</label>
-          <label><input type="radio" name="jenis_sewa" value="sementara" <?= $js === 'sementara' ? 'checked' : '' ?>> Sementara</label>
-        </div>
-      </div>
-      <div class="field">
-        <label for="durasi_bulan">Durasi (bulan)</label>
-        <input type="number" id="durasi_bulan" name="durasi_bulan" min="1" max="60" value="<?= e(old('durasi_bulan')) ?>">
-        <div class="hint">Hanya untuk sewa sementara.</div>
-      </div>
+      <div class="alert alert-info" style="margin-bottom:16px">Sewa minimal <strong>1 bulan</strong> dan berlanjut setiap bulan sampai Anda berhenti. Tagihan bulan berikutnya terbit otomatis 7 hari sebelum jatuh tempo.</div>
       <div class="btn-row">
         <button class="btn" type="submit">Pesan &amp; Buat Tagihan DP</button>
         <a class="btn btn-outline" href="/kamar/<?= (int)$k['id_kamar'] ?>">Batal</a>

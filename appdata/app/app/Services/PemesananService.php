@@ -10,6 +10,7 @@ class PemesananService
     private PembayaranRepository $pembayaran;
     private KamarService $kamarSvc;
     private NotifikasiService $notif;
+    private PenggunaRepository $pengguna;
 
     public function __construct()
     {
@@ -19,6 +20,7 @@ class PemesananService
         $this->pembayaran = new PembayaranRepository();
         $this->kamarSvc = new KamarService();
         $this->notif = new NotifikasiService();
+        $this->pengguna = new PenggunaRepository();
     }
 
     public function daftarPenyewa(int $idPenyewa): array
@@ -52,6 +54,10 @@ class PemesananService
 
     public function buat(int $idPenyewa, int $idKamar, array $in): int
     {
+        $penyewa = $this->pengguna->byId($idPenyewa);
+        if (!empty($penyewa['blacklist'])) {
+            throw new AppException('Akun Anda masuk daftar hitam karena tunggakan sebelumnya sehingga tidak dapat memesan kamar. Hubungi pengelola kos.');
+        }
         $kunjungan = $this->tanggal((string)($in['tanggal_kunjungan'] ?? ''), 'Tanggal kunjungan');
         $masuk = $this->tanggal((string)($in['tanggal_masuk'] ?? ''), 'Tanggal masuk');
         $hariIni = date('Y-m-d');
@@ -61,17 +67,8 @@ class PemesananService
         if ($kunjungan > $masuk) {
             throw new AppException('Tanggal kunjungan harus sebelum atau sama dengan tanggal masuk.');
         }
-        $jenis = (string)($in['jenis_sewa'] ?? '');
-        if (!in_array($jenis, ['tetap', 'sementara'], true)) {
-            throw new AppException('Pilih jenis sewa.');
-        }
+        $jenis = 'tetap'; // semua sewa bersifat tetap: minimal 1 bulan dan berlanjut tiap bulan
         $durasi = null;
-        if ($jenis === 'sementara') {
-            $durasi = (int)($in['durasi_bulan'] ?? 0);
-            if ($durasi < 1 || $durasi > 60) {
-                throw new AppException('Durasi sewa sementara harus 1 sampai 60 bulan.');
-            }
-        }
 
         return Database::transaction(function () use ($idPenyewa, $idKamar, $kunjungan, $masuk, $jenis, $durasi) {
             // Cek ketersediaan + ubah status dalam satu transaksi dengan penguncian baris kamar.
@@ -168,6 +165,28 @@ class PemesananService
         $this->pemesanan->update((int)$p['id_pemesanan'], ['status' => 'Selesai']);
         $this->kamar->setStatus((int)$p['id_kamar'], 'Tersedia');
         $this->notif->kirim((int)$p['id_penyewa'], 'tagihan', 'Masa sewa Anda telah berakhir. Terima kasih telah menyewa di AmbatuKos.');
+    }
+
+    /** Putus sewa sepihak: hanya setelah melewati batas toleransi; kamar dikosongkan dan penyewa masuk blacklist. */
+    public function putusSepihak(int $id): void
+    {
+        Database::transaction(function () use ($id) {
+            $p = $this->pemesanan->find($id, true);
+            if ($p === null || $p['status'] !== 'Aktif') {
+                throw new AppException('Sewa aktif tidak ditemukan.');
+            }
+            $t = $this->tagihan->tertuaBelumLunasByPemesanan($id);
+            $batas = PengaturanService::int('batas_putus_hari');
+            $hari = $t === null ? 0 : hari_telat($t['jatuh_tempo']);
+            if ($t === null || $hari <= $batas) {
+                throw new AppException("Penyewa belum melewati batas toleransi ($batas hari keterlambatan).");
+            }
+            $alasan = "Putus sewa sepihak: menunggak $hari hari";
+            $this->pemesanan->update($id, ['status' => 'Selesai', 'alasan_batal' => $alasan]);
+            $this->kamar->setStatus((int)$p['id_kamar'], 'Tersedia');
+            $this->pengguna->update((int)$p['id_penyewa'], ['blacklist' => 1, 'catatan_blacklist' => $alasan]);
+            $this->notif->kirim((int)$p['id_penyewa'], 'tagihan', 'Sewa Anda diputus sepihak karena tunggakan melewati batas toleransi. Akun Anda masuk daftar hitam; tunggakan tetap harus dilunasi.');
+        });
     }
 
     // ---------- Dipanggil Penjadwal (UC-11) ----------

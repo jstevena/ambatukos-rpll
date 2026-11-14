@@ -39,7 +39,7 @@ class PembayaranService
                     throw new AppException('Tagihan ini sudah tidak dapat diunggah buktinya.');
                 }
                 $this->pembayaran->create([
-                    'id_tagihan' => $idTagihan, 'tanggal_bayar' => date('Y-m-d H:i:s'), 'jumlah' => $cur['jumlah'],
+                    'id_tagihan' => $idTagihan, 'tanggal_bayar' => date('Y-m-d H:i:s'), 'jumlah' => (float)$cur['jumlah'] + $this->tagihan->dendaJumlah($idTagihan), // pokok + denda berjalan
                     'bukti_transfer' => $path, 'status' => 'Menunggu Verifikasi',
                 ]);
                 $this->tagihan->update($idTagihan, ['status' => 'Menunggu Verifikasi']);
@@ -141,6 +141,7 @@ class PembayaranService
                 'catatan_admin' => mb_substr($catatan, 0, 255),
             ]);
             $this->tagihan->update((int)$pb['id_tagihan'], ['status' => 'Belum Dibayar']);
+            $this->tagihan->setDendaTerakhir((int)$pb['id_tagihan'], date('Y-m-d')); // hari proses verifikasi tidak didendakan
             $this->notif->kirim((int)$t['id_penyewa'], 'verifikasi', sprintf(
                 'Bukti pembayaran %s kamar %s ditolak: %s. Silakan unggah ulang.', $t['jenis'], $t['nomor_kamar'], $catatan
             ));
@@ -189,6 +190,11 @@ class PembayaranService
     public function belumBayar(): array
     {
         return $this->tagihan->belumBayar(date('Y-m-d H:i:s'));
+    }
+
+    public function jumlahPrioritasTagih(): int
+    {
+        return $this->tagihan->jumlahPrioritas(date('Y-m-d'), PengaturanService::int('menunggak_hari'));
     }
 
     public function jumlahPenyewaBelumBayar(): int

@@ -74,7 +74,7 @@ class PenggunaRepository extends Repository
         $total = (int)Database::val("SELECT COUNT(*) FROM pengguna $w", $p);
         $offset = max(0, ($page - 1) * $per);
         $rows = Database::all(
-            "SELECT id_pengguna, nama, username, no_hp, nik, peran, status_akun, created_at,
+            "SELECT id_pengguna, nama, username, no_hp, nik, peran, status_akun, blacklist, created_at,
                     (peran = 'penyewa' AND " . self::MANTAN . ") AS mantan
                FROM pengguna $w
               ORDER BY FIELD(peran, 'pemilik', 'admin', 'penyewa'), nama LIMIT " . (int)$per . ' OFFSET ' . (int)$offset,

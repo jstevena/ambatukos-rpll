@@ -145,6 +145,17 @@ class PenggunaService
         return $nama;
     }
 
+    /** Tandai/cabut blacklist penyewa (blacklist otomatis terjadi pada putus sewa sepihak). */
+    public function ubahBlacklist(int $id, bool $flag): string
+    {
+        $u = $this->repo->byId($id);
+        if ($u === null || $u['peran'] !== 'penyewa') {
+            throw new AppException('Hanya akun penyewa yang dapat di-blacklist.');
+        }
+        $this->repo->update($id, ['blacklist' => $flag ? 1 : 0, 'catatan_blacklist' => $flag ? 'Ditandai oleh pengelola' : null]);
+        return $u['nama'];
+    }
+
     public function daftar(?string $peran, string $q, int $page): array
     {
         if (!in_array($peran, ['penyewa', 'mantan', 'admin', 'pemilik'], true)) {

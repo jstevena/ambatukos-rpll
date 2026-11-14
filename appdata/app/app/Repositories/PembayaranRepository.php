@@ -18,7 +18,7 @@ class PembayaranRepository extends Repository
         $this->updateById('pembayaran', 'id_pembayaran', $id, $data);
     }
 
-    private const DETAIL = 'SELECT pb.*, t.jenis, t.periode_ke, t.jumlah AS jumlah_tagihan, t.jatuh_tempo, t.id_pemesanan,
+    private const DETAIL = 'SELECT pb.*, t.jenis, t.periode_ke, t.jumlah AS jumlah_tagihan, (SELECT COALESCE(SUM(d.jumlah), 0) FROM tagihan_denda d WHERE d.id_tagihan = t.id_tagihan) AS denda, t.jatuh_tempo, t.id_pemesanan,
                                    p.id_penyewa, p.status AS status_pemesanan, p.alasan_batal, k.nomor_kamar, u.nama AS nama_penyewa, u.no_hp
                               FROM pembayaran pb
                               JOIN tagihan t ON t.id_tagihan = pb.id_tagihan

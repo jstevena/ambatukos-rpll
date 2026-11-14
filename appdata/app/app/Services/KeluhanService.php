@@ -34,6 +34,9 @@ class KeluhanService
 
     public function ajukan(int $idPenyewa, int $idKamar, string $judul, string $deskripsi): void
     {
+        if ((new TagihanService())->menunggak($idPenyewa) !== null) {
+            throw new AppException('Fitur keluhan dikunci sementara karena tagihan Anda menunggak. Lunasi tagihan terlebih dahulu.');
+        }
         $judul = trim($judul);
         $deskripsi = trim($deskripsi);
         if ($judul === '' || $deskripsi === '') {

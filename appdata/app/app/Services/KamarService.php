@@ -79,7 +79,7 @@ class KamarService
         $fasilitas = trim((string)($in['fasilitas'] ?? ''));
         $bulan = normalisasi_rupiah((string)($in['biaya_per_bulan'] ?? ''));
         $tahun = normalisasi_rupiah((string)($in['biaya_per_tahun'] ?? ''));
-        $jenis = (string)($in['jenis_sewa'] ?? '');
+        $jenis = 'tetap'; // semua kamar disewakan sebagai sewa tetap (minimal 1 bulan)
 
         if ($nomor === '' || $luas === '' || $bulan === '' || $jenis === '') {
             throw new AppException('Nomor kamar, luas, biaya per bulan, dan jenis sewa wajib diisi.');

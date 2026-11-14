@@ -67,6 +67,14 @@ class PemesananController extends Controller
         $this->redirect('/admin/kamar');
     }
 
+    /** Putus sewa sepihak (admin) setelah melewati batas toleransi. */
+    public function putus(string $id): void
+    {
+        $this->svc->putusSepihak((int)$id);
+        flash('success', 'Sewa diputus sepihak. Kamar dikosongkan dan penyewa masuk daftar hitam.');
+        $this->redirect('/admin/belum-bayar');
+    }
+
     private function notFound(): never
     {
         http_response_code(404);

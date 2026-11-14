@@ -84,34 +84,129 @@ class TagihanService
         return $terbit;
     }
 
-    /** BR-09: pengingat H-3 bila belum lunas. */
+    /** Pengingat sebelum jatuh tempo: H-3, H-1, dan hari H (tahap dicatat pada bitmask pengingat_terkirim). */
     public function kirimPengingat(): int
     {
-        $now = date('Y-m-d H:i:s');
-        $batas = date('Y-m-d H:i:s', strtotime('+3 days'));
+        $hariIni = date('Y-m-d');
+        $mulai = $hariIni . ' 00:00:00';
+        $batas = date('Y-m-d', strtotime('+3 days')) . ' 23:59:59';
         $n = 0;
-        foreach ($this->tagihan->untukPengingat($now, $batas) as $t) {
-            $this->tagihan->update((int)$t['id_tagihan'], ['pengingat_terkirim' => 1]);
-            $this->notif->kirim((int)$t['id_penyewa'], 'pengingat', sprintf(
-                'Pengingat: tagihan %s sebesar %s jatuh tempo %s.', $t['jenis'], rupiah($t['jumlah']), tgl($t['jatuh_tempo'])
-            ));
+        foreach ($this->tagihan->untukPengingat($mulai, $batas) as $t) {
+            $sisa = (int)round((strtotime(date('Y-m-d', strtotime($t['jatuh_tempo']))) - strtotime($hariIni)) / 86400);
+            $flag = (int)$t['pengingat_terkirim'];
+            if ($sisa <= 0 && !($flag & 4)) {
+                $bit = 7;
+                $kata = 'jatuh tempo HARI INI';
+            } elseif ($sisa === 1 && !($flag & 2)) {
+                $bit = 3;
+                $kata = 'jatuh tempo BESOK (H-1)';
+            } elseif ($sisa >= 2 && !($flag & 1)) {
+                $bit = 1;
+                $kata = "jatuh tempo $sisa hari lagi (H-$sisa)";
+            } else {
+                continue;
+            }
+            $ket = in_array($t['jenis'], ['Sewa Bulanan', 'Sewa Tahunan'], true) ? ' Hindari denda dengan membayar sebelum jatuh tempo.' : '';
+            $this->tagihan->update((int)$t['id_tagihan'], ['pengingat_terkirim' => $flag | $bit]);
+            $this->notif->kirim((int)$t['id_penyewa'], 'pengingat', sprintf('Pengingat: tagihan %s sebesar %s %s.%s', $t['jenis'], rupiah($t['jumlah']), $kata, $ket));
             $n++;
         }
         return $n;
     }
 
-    /** BR-09: tagihan yang lewat jatuh tempo berstatus Terlambat (denda belum diatur). */
+    /** Tagihan sewa yang lewat jatuh tempo berstatus Terlambat (pengingat harian dikirim terpisah). */
     public function tandaiTerlambat(): int
     {
         $n = 0;
         foreach ($this->tagihan->untukTerlambat(date('Y-m-d H:i:s')) as $t) {
             $this->tagihan->update((int)$t['id_tagihan'], ['status' => 'Terlambat']);
-            $this->notif->kirim((int)$t['id_penyewa'], 'pengingat', sprintf(
-                'Tagihan sewa %s sebesar %s telah lewat jatuh tempo (%s). Mohon segera dibayar.', $t['jenis'], rupiah($t['jumlah']), tgl($t['jatuh_tempo'])
-            ));
             $n++;
         }
         return $n;
+    }
+
+    /**
+     * Denda dihitung per hari oleh penjadwal dan disimpan di tabel tagihan_denda (item terpisah dari harga pokok).
+     * Denda mulai pada H+(masa tenggang + 1); hari yang tercakup janji bayar yang disetujui dilewati (dijeda).
+     */
+    public function hitungDenda(): int
+    {
+        $tipe = PengaturanService::get('denda_tipe');
+        $nominal = (float)PengaturanService::get('denda_nominal');
+        $maks = (float)PengaturanService::get('denda_maks');
+        $grace = PengaturanService::int('grace_hari');
+        $hariIni = date('Y-m-d');
+        $diproses = 0;
+        foreach ($this->tagihan->untukDenda(date('Y-m-d H:i:s')) as $t) {
+            $id = (int)$t['id_tagihan'];
+            $jatuhTempo = date('Y-m-d', strtotime($t['jatuh_tempo']));
+            $d = $this->tagihan->dendaByTagihan($id);
+            if ($d === null) {
+                $awal = date('Y-m-d', strtotime("$jatuhTempo +$grace days"));
+                $this->tagihan->buatDenda($id, $awal);
+                $d = ['jumlah' => 0, 'hari' => 0, 'terakhir_dihitung' => $awal];
+            }
+            $jumlah = (float)$d['jumlah'];
+            $hari = (int)$d['hari'];
+            $sampaiJanji = $this->tagihan->janjiDisetujuiSampai($id);
+            $tgl = date('Y-m-d', strtotime($d['terakhir_dihitung'] . ' +1 day'));
+            for ($i = 0; $tgl <= $hariIni && $i < 400; $i++, $tgl = date('Y-m-d', strtotime("$tgl +1 day"))) {
+                if ($sampaiJanji !== null && $tgl <= $sampaiJanji) {
+                    continue; // dijeda oleh janji bayar
+                }
+                if ($tipe === 'flat') {
+                    if ($jumlah <= 0) {
+                        $jumlah = $nominal;
+                        $hari = 1;
+                    }
+                } else {
+                    $jumlah += $nominal;
+                    $hari++;
+                    if ($maks > 0 && $jumlah > $maks) {
+                        $jumlah = $maks;
+                    }
+                }
+            }
+            $terakhir = max($d['terakhir_dihitung'], $hariIni);
+            $this->tagihan->simpanDenda($id, $jumlah, $hari, $terakhir);
+            $diproses++;
+        }
+        return $diproses;
+    }
+
+    /** Pengingat harian untuk tagihan yang sudah lewat jatuh tempo (masa tenggang, denda berjalan, menunggak). */
+    public function kirimPengingatTerlambat(): int
+    {
+        $hariIni = date('Y-m-d');
+        $n = 0;
+        foreach ($this->tagihan->untukPengingatTerlambat($hariIni, date('Y-m-d H:i:s')) as $t) {
+            $fase = fase_tagihan($t)['label'];
+            $hari = hari_telat($t['jatuh_tempo']);
+            $denda = (float)$t['denda'];
+            $total = (float)$t['jumlah'] + $denda;
+            if ($fase === 'Menunggak') {
+                $pesan = sprintf('PERINGATAN KERAS: tagihan kamar %s menunggak %d hari. Total yang harus dibayar %s (termasuk denda %s). Fitur keluhan dikunci sampai tagihan lunas.', $t['nomor_kamar'], $hari, rupiah($total), rupiah($denda));
+            } elseif ($fase === 'Terlambat (Denda Berjalan)') {
+                $pesan = sprintf('Tagihan kamar %s terlambat %d hari. Denda berjalan %s, total %s. Segera lakukan pembayaran.', $t['nomor_kamar'], $hari, rupiah($denda), rupiah($total));
+            } else {
+                $pesan = sprintf('Tagihan kamar %s terlambat %d hari (masa tenggang, denda belum berlaku). Segera bayar %s.', $t['nomor_kamar'], $hari, rupiah($total));
+            }
+            $this->tagihan->update((int)$t['id_tagihan'], ['pengingat_terakhir' => $hariIni]);
+            $this->notif->kirim((int)$t['id_penyewa'], 'pengingat', $pesan);
+            $n++;
+        }
+        return $n;
+    }
+
+    /** Tagihan yang menunggak (>= H+8 bawaan) milik penyewa; null bila tidak ada. */
+    public function menunggak(int $idPenyewa): ?array
+    {
+        return $this->tagihan->menunggakByPenyewa($idPenyewa, date('Y-m-d'), PengaturanService::int('menunggak_hari'));
+    }
+
+    public function jumlahPrioritasTagih(): int
+    {
+        return $this->tagihan->jumlahPrioritas(date('Y-m-d'), PengaturanService::int('menunggak_hari'));
     }
 
     public function riwayat(int $idPenyewa, int $page, int $per = 10): array

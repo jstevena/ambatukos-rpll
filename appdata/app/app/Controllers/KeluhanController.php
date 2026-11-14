@@ -19,6 +19,7 @@ class KeluhanController extends Controller
         }
         $this->view('keluhan/index', [
             'title' => 'Keluhan', 'daftar' => $this->svc->byPenyewa(Auth::id()), 'kamar' => $this->svc->kamarSewaan(Auth::id()),
+            'menunggak' => (new TagihanService())->menunggak(Auth::id()),
         ]);
     }
 

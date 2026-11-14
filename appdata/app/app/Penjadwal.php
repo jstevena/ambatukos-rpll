@@ -16,8 +16,10 @@ class Penjadwal
             'Tutup pemesanan tanpa pelunasan (DP hangus)' => fn() => $pemesanan->kedaluwarsakanPelunasan(),
             'Akhiri sewa sementara yang habis masa' => fn() => $pemesanan->selesaikanSewaSementara(),
             'Terbitkan tagihan periodik (H-7)' => fn() => $tagihan->terbitkanPeriodik(),
-            'Kirim pengingat jatuh tempo (H-3)' => fn() => $tagihan->kirimPengingat(),
+            'Kirim pengingat jatuh tempo (H-3, H-1, hari H)' => fn() => $tagihan->kirimPengingat(),
             'Tandai tagihan Terlambat' => fn() => $tagihan->tandaiTerlambat(),
+            'Hitung denda harian' => fn() => $tagihan->hitungDenda(),
+            'Kirim pengingat keterlambatan harian' => fn() => $tagihan->kirimPengingatTerlambat(),
         ];
         $log = [];
         foreach ($langkah as $nama => $fn) {

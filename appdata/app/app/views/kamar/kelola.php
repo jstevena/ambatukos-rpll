@@ -10,14 +10,13 @@
   <?php else: ?>
   <div class="table-wrap">
     <table class="table-cards">
-      <thead><tr><th>Kamar</th><th>Luas</th><th class="num">Biaya / bulan</th><th>Jenis</th><th>Status</th><th>Aksi</th></tr></thead>
+      <thead><tr><th>Kamar</th><th>Luas</th><th class="num">Biaya / bulan</th><th>Status</th><th>Aksi</th></tr></thead>
       <tbody>
       <?php foreach ($d['rows'] as $k): ?>
         <tr>
           <td data-label="Kamar"><strong><?= e($k['nomor_kamar']) ?></strong></td>
           <td data-label="Luas"><?= e(rtrim(rtrim((string)$k['luas'], '0'), '.')) ?> m&sup2;</td>
           <td data-label="Biaya / bulan" class="num"><?= rupiah($k['biaya_per_bulan']) ?></td>
-          <td data-label="Jenis"><?= e(ucfirst($k['jenis_sewa'])) ?></td>
           <td data-label="Status"><?= badge($k['status']) ?></td>
           <td data-label="Aksi">
             <div class="row-actions">

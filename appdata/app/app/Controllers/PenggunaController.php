@@ -45,6 +45,14 @@ class PenggunaController extends Controller
         $this->redirect('/pengguna');
     }
 
+    public function blacklist(string $id): void
+    {
+        $flag = $this->input('nilai') === '1';
+        $nama = $this->svc->ubahBlacklist((int)$id, $flag);
+        flash('success', $flag ? 'Penyewa "' . $nama . '" masuk daftar hitam.' : 'Blacklist "' . $nama . '" dicabut.');
+        $this->redirect('/pengguna');
+    }
+
     public function hapus(string $id): void
     {
         $r = $this->svc->hapus(Auth::id(), (string)Auth::role(), (int)$id);

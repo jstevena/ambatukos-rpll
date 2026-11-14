@@ -26,6 +26,8 @@ class HomeController extends Controller
                 'menunggu' => array_slice($bayar->menungguVerifikasi(), 0, 8),
                 'jumlahMenunggu' => $bayar->jumlahMenungguVerifikasi(),
                 'belumBayar' => $bayar->jumlahPenyewaBelumBayar(),
+                'prioritas' => $bayar->jumlahPrioritasTagih(),
+                'janjiMenunggu' => (new JanjiBayarService())->jumlahMenunggu(),
             ]);
             return;
         }
@@ -46,6 +48,7 @@ class HomeController extends Controller
             'aktif' => array_values(array_filter($semua, static fn($p) => $p['status'] === 'Aktif')),
             'berjalan' => array_values(array_filter($semua, static fn($p) => in_array($p['status'], ['Menunggu DP', 'Menunggu Pelunasan'], true))),
             'berikutnya' => (new TagihanService())->berikutnya($uid),
+            'menunggak' => (new TagihanService())->menunggak($uid),
             'notifikasi' => (new NotifikasiService())->terbaru($uid, 4),
         ]);
     }

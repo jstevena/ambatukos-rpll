@@ -1,5 +1,12 @@
 <div class="page-head"><div><h1>Dashboard Admin</h1><p class="muted" style="margin:0">Ringkasan operasional kos.</p></div></div>
 
+<?php if (!empty($prioritas)): ?>
+  <a class="alert alert-error" href="/admin/belum-bayar" style="display:block;text-decoration:none"><strong>Prioritas Tagih Langsung:</strong> <?= (int)$prioritas ?> penyewa menunggak. Klik untuk melihat dan menindaklanjuti.</a>
+<?php endif; ?>
+<?php if (!empty($janjiMenunggu)): ?>
+  <a class="alert alert-info" href="/admin/belum-bayar" style="display:block;text-decoration:none"><?= (int)$janjiMenunggu ?> janji bayar menunggu persetujuan.</a>
+<?php endif; ?>
+
 <div class="grid grid-4" style="margin-bottom:16px">
   <div class="stat"><div class="n"><?= (int)$totalKamar ?></div><div class="l">Total Kamar</div></div>
   <div class="stat"><div class="n"><?= (int)$status['Terisi'] ?></div><div class="l">Kamar Terisi</div></div>

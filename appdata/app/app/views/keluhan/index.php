@@ -4,10 +4,14 @@ $pengelola = in_array(Auth::role(), ['admin', 'pemilik'], true);      // admin &
 ?>
 <div class="page-head"><div><h1>Keluhan / Perbaikan</h1></div></div>
 
+<?php include BASE_PATH . '/app/views/_menunggak.php'; ?>
+
 <?php if (!$pengelola): ?>
   <div class="card form-wide">
     <h2>Ajukan Keluhan</h2>
-    <?php if ($kamar === []): ?>
+    <?php if (!empty($menunggak)): ?>
+      <div class="muted">Fitur keluhan dikunci sementara karena tagihan Anda menunggak. Lunasi tagihan terlebih dahulu.</div>
+    <?php elseif ($kamar === []): ?>
       <div class="muted">Keluhan hanya dapat diajukan oleh penyewa yang sedang menyewa kamar.</div>
     <?php else: ?>
       <form method="post" action="/keluhan">

@@ -44,7 +44,7 @@ $warna = ['penyewa' => 'gray', 'admin' => 'info', 'pemilik' => 'ok'];
           <td data-label="No. HP"><?= e(tampil_hp($u['no_hp'])) ?></td>
           <td data-label="NIK"><?= e($u['nik'] ?: '-') ?></td>
           <td data-label="Terdaftar"><?= e(tgl($u['created_at'])) ?></td>
-          <td data-label="Status"><?= badge($u['status_akun'] === 'aktif' ? 'Aktif' : 'Nonaktif', $u['status_akun'] === 'aktif' ? 'ok' : 'gray') ?></td>
+          <td data-label="Status"><?= badge($u['status_akun'] === 'aktif' ? 'Aktif' : 'Nonaktif', $u['status_akun'] === 'aktif' ? 'ok' : 'gray') ?><?= !empty($u['blacklist']) ? ' ' . badge('Blacklist', 'danger') : '' ?></td>
           <td data-label="Aksi">
             <?php if ($self): ?>
               <span class="muted small">Akun Anda</span>
@@ -56,6 +56,13 @@ $warna = ['penyewa' => 'gray', 'admin' => 'info', 'pemilik' => 'ok'];
               <div class="row-actions">
                 <?php if ($u['peran'] === 'penyewa' || ($u['peran'] === 'admin' && $myRole === 'pemilik')): ?>
                   <a class="btn btn-outline btn-sm" href="/pengguna/<?= (int)$u['id_pengguna'] ?>/ubah">Ubah</a>
+                <?php endif; ?>
+                <?php if ($u['peran'] === 'penyewa'): ?>
+                <form method="post" action="/pengguna/<?= (int)$u['id_pengguna'] ?>/blacklist" data-confirm="<?= empty($u['blacklist']) ? 'Masukkan ' . e($u['nama']) . ' ke daftar hitam? Ia tidak dapat memesan kamar lagi.' : 'Cabut blacklist ' . e($u['nama']) . '?' ?>">
+                  <?= csrf_field() ?>
+                  <input type="hidden" name="nilai" value="<?= empty($u['blacklist']) ? '1' : '0' ?>">
+                  <button class="btn btn-outline btn-sm" type="submit"><?= empty($u['blacklist']) ? 'Blacklist' : 'Cabut Blacklist' ?></button>
+                </form>
                 <?php endif; ?>
                 <form method="post" action="/pengguna/<?= (int)$u['id_pengguna'] ?>/status">
                   <?= csrf_field() ?>

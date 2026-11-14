@@ -96,7 +96,7 @@ function menu_for(?string $role): array
             ['Keluhan', '/keluhan'], ['Pengguna', '/pengguna'],
         ],
         'pemilik' => [
-            ['Dashboard', '/dashboard'], ['Kelola Kamar', '/admin/kamar'], ['Kenaikan Sewa', '/pemilik/kenaikan-sewa'], ['Keluhan', '/keluhan'], ['Pengguna', '/pengguna'], ['Laporan Pendapatan', '/laporan'],
+            ['Dashboard', '/dashboard'], ['Kelola Kamar', '/admin/kamar'], ['Kenaikan Sewa', '/pemilik/kenaikan-sewa'], ['Fasilitas Umum', '/pemilik/fasilitas'], ['Keluhan', '/keluhan'], ['Pengguna', '/pengguna'], ['Laporan Pendapatan', '/laporan'],
         ],
         default => [['Daftar Kamar', '/kamar']],
     };
@@ -128,6 +128,7 @@ function link_notifikasi(string $jenis, ?string $peran): string
         'verifikasi' => $peran === 'admin' ? '/admin/verifikasi' : '/pembayaran',
         'pengembalian_dp' => $peran === 'admin' ? '/admin/verifikasi' : '/pemesanan',
         'kenaikan_sewa' => $peran === 'admin' ? '/admin/pengumuman' : '/beranda',
+        'janji_bayar' => $peran === 'admin' ? '/admin/belum-bayar' : '/pembayaran',
         'keluhan' => '/keluhan',
         default => '/notifikasi',
     };
@@ -172,4 +173,90 @@ function normalisasi_rupiah(?string $v): string
 {
     $v = preg_replace('/,\d{1,2}$/', '', trim((string)$v)); // buang desimal (,00)
     return ltrim((string)preg_replace('/\D/', '', $v), '0');
+}
+
+/** Hari keterlambatan terhadap tanggal jatuh tempo (negatif = belum jatuh tempo). */
+function hari_telat(?string $jatuhTempo): int
+{
+    if (!$jatuhTempo) {
+        return 0;
+    }
+    return (int)round((strtotime(date('Y-m-d')) - strtotime(date('Y-m-d', strtotime($jatuhTempo)))) / 86400);
+}
+
+/**
+ * Fase tagihan sewa menurut hari keterlambatan:
+ * Menunggu Pembayaran -> Jatuh Tempo Hari Ini -> Terlambat (Masa Tenggang) -> Terlambat (Denda Berjalan) -> Menunggak.
+ * Tagihan lain / status lain mengembalikan statusnya apa adanya.
+ *
+ * @return array{label: string, kelas: ?string, hari: int}
+ */
+function fase_tagihan(array $t): array
+{
+    $status = (string)($t['status'] ?? '');
+    if (!in_array($t['jenis'] ?? '', ['Sewa Bulanan', 'Sewa Tahunan'], true) || !in_array($status, ['Belum Dibayar', 'Terlambat'], true)) {
+        return ['label' => $status, 'kelas' => null, 'hari' => 0];
+    }
+    $h = hari_telat($t['jatuh_tempo'] ?? null);
+    $grace = PengaturanService::int('grace_hari');
+    $tunggak = PengaturanService::int('menunggak_hari');
+    if ($h < 0) {
+        return ['label' => 'Menunggu Pembayaran', 'kelas' => 'warn', 'hari' => $h];
+    }
+    if ($h === 0) {
+        return ['label' => 'Jatuh Tempo Hari Ini', 'kelas' => 'warn', 'hari' => $h];
+    }
+    if ($h <= $grace) {
+        return ['label' => 'Terlambat (Masa Tenggang)', 'kelas' => 'warn', 'hari' => $h];
+    }
+    if ($h < $tunggak) {
+        return ['label' => 'Terlambat (Denda Berjalan)', 'kelas' => 'danger', 'hari' => $h];
+    }
+    return ['label' => 'Menunggak', 'kelas' => 'danger', 'hari' => $h];
+}
+
+function badge_tagihan(array $t): string
+{
+    $f = fase_tagihan($t);
+    return badge($f['label'], $f['kelas']);
+}
+
+/** Total yang harus dibayar: harga pokok + denda berjalan. */
+function total_tagihan(array $t): float
+{
+    return (float)($t['jumlah'] ?? 0) + (float)($t['denda'] ?? 0);
+}
+
+/** Penyewa boleh mengajukan janji bayar untuk tagihan sewa yang belum dibayar dan belum punya janji hidup. */
+function bisa_janji(array $t): bool
+{
+    return in_array($t['jenis'] ?? '', ['Sewa Bulanan', 'Sewa Tahunan'], true)
+        && in_array($t['status'] ?? '', ['Belum Dibayar', 'Terlambat'], true)
+        && (empty($t['janji_status']) || $t['janji_status'] === 'Ditolak');
+}
+
+/** Keterangan status janji bayar pada sebuah tagihan (HTML aman). */
+function janji_info(array $t): string
+{
+    $s = $t['janji_status'] ?? null;
+    if (!$s) {
+        return '';
+    }
+    $tgl = e(tgl($t['janji_tanggal'] ?? null));
+    return match ($s) {
+        'Diajukan' => '<div class="small muted">Janji bayar diajukan (sampai ' . $tgl . '), menunggu persetujuan.</div>',
+        'Disetujui' => '<div class="small" style="color:var(--ok)">Janji bayar disetujui sampai ' . $tgl . ': denda dijeda.</div>',
+        'Ditolak' => '<div class="small" style="color:var(--danger)">Janji bayar ditolak.</div>',
+        default => '',
+    };
+}
+
+/** Total tagihan (pokok + denda) dengan catatan denda bila ada (HTML aman). */
+function tampil_total_tagihan(array $t): string
+{
+    $out = e(rupiah(total_tagihan($t)));
+    if ((float)($t['denda'] ?? 0) > 0) {
+        $out .= '<div class="small" style="color:var(--danger)">termasuk denda ' . e(rupiah($t['denda'])) . '</div>';
+    }
+    return $out;
 }

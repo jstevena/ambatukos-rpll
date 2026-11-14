@@ -31,14 +31,6 @@ $luas = $edit ? rtrim(rtrim((string)$k['luas'], '0'), '.') : '';
       </div>
     </div>
     <div class="field">
-      <label for="jenis_sewa">Jenis sewa</label>
-      <select id="jenis_sewa" name="jenis_sewa" required>
-        <?php $js = old('jenis_sewa', $edit ? $k['jenis_sewa'] : 'tetap'); foreach (['tetap' => 'Tetap', 'sementara' => 'Sementara'] as $v => $l): ?>
-          <option value="<?= $v ?>" <?= $js === $v ? 'selected' : '' ?>><?= $l ?></option>
-        <?php endforeach; ?>
-      </select>
-    </div>
-    <div class="field">
       <label for="fasilitas">Fasilitas</label>
       <textarea id="fasilitas" name="fasilitas" placeholder="Pisahkan dengan koma, mis. Kasur, Lemari, AC"><?= e(old('fasilitas', $edit ? $k['fasilitas'] : '')) ?></textarea>
     </div>

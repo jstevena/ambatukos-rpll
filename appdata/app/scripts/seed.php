@@ -30,11 +30,11 @@ $now = date('Y-m-d H:i:s');
 $buat = static fn(array $d) => $repo->create($d + ['status_akun' => 'aktif', 'created_at' => $now]);
 
 $idPemilik = $buat([
-    'nama' => 'Mas Amba', 'username' => 'ambaperrel', 'password_hash' => password_hash(env('SEED_PEMILIK_PASSWORD', 'pemilik123'), PASSWORD_DEFAULT),
+    'nama' => 'Bu Sari', 'username' => 'pemilik', 'password_hash' => password_hash(env('SEED_PEMILIK_PASSWORD', 'pemilik123'), PASSWORD_DEFAULT),
     'no_hp' => '+6281200000001', 'peran' => 'pemilik',
 ]);
 $buat([
-    'nama' => 'Pak Rusdi', 'username' => 'rusdiwijaya', 'password_hash' => password_hash(env('SEED_ADMIN_PASSWORD', 'admin123'), PASSWORD_DEFAULT),
+    'nama' => 'Pak Dedi', 'username' => 'admin', 'password_hash' => password_hash(env('SEED_ADMIN_PASSWORD', 'admin123'), PASSWORD_DEFAULT),
     'no_hp' => '+6281200000002', 'peran' => 'admin',
 ]);
 echo "[seed] akun pemilik & admin dibuat\n";
@@ -54,12 +54,12 @@ if ($aktif('SEED_PENYEWA')) {
 if ($aktif('SEED_KAMAR')) {
     $kamar = new KamarRepository();
     $demo = [
-        ['101', 9.00, 'Kasur, Lemari, Meja belajar, Kipas angin, Kamar mandi luar', 800000, 8800000, 'tetap'],
-        ['102', 12.00, 'Kasur, Lemari, Meja belajar, AC, Kamar mandi dalam', 1200000, 13200000, 'tetap'],
-        ['103', 12.00, 'Kasur, Lemari, Meja belajar, AC, Kamar mandi dalam, Water heater', 1500000, 16500000, 'tetap'],
-        ['201', 9.00, 'Kasur, Lemari, Kipas angin, Kamar mandi luar', 750000, null, 'sementara'],
-        ['202', 15.00, 'Kasur besar, Lemari, Meja kerja, AC, Kamar mandi dalam, Balkon', 1800000, 19800000, 'tetap'],
-        ['203', 12.00, 'Kasur, Lemari, Meja belajar, AC, Kamar mandi dalam', 1250000, null, 'sementara'],
+        ['101', 9.00, 'Spring bed, bantal & guling, AC, Lemari baju, Meja & kursi kerja', 1200000, null, 'tetap'],
+        ['102', 9.00, 'Spring bed, bantal & guling, AC, Lemari baju, Meja & kursi kerja', 1200000, null, 'tetap'],
+        ['103', 12.00, 'Spring bed, bantal & guling, AC, Lemari baju, Meja & kursi kerja, Jendela besar', 1400000, null, 'tetap'],
+        ['201', 9.00, 'Spring bed, bantal & guling, AC, Lemari baju, Meja & kursi kerja', 1250000, null, 'tetap'],
+        ['202', 12.00, 'Spring bed, bantal & guling, AC, Lemari baju, Meja & kursi kerja, Balkon', 1500000, null, 'tetap'],
+        ['203', 9.00, 'Spring bed, bantal & guling, AC, Lemari baju, Meja & kursi kerja', 1250000, null, 'tetap'],
     ];
     foreach ($demo as [$no, $luas, $fas, $bulan, $tahun, $jenis]) {
         $kamar->create([

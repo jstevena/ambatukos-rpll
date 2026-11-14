@@ -10,7 +10,6 @@
     <dt>Tanggal pesan</dt><dd><?= e(tgl($p['tanggal_pesan'], true)) ?></dd>
     <dt>Tanggal kunjungan</dt><dd><?= e(tgl($p['tanggal_kunjungan'])) ?></dd>
     <dt>Tanggal masuk</dt><dd><?= e(tgl($p['tanggal_masuk'])) ?></dd>
-    <dt>Jenis sewa</dt><dd><?= e(ucfirst($p['jenis_sewa'])) ?><?= $p['durasi_bulan'] ? ', ' . (int)$p['durasi_bulan'] . ' bulan' : '' ?></dd>
     <?php if ($p['tanggal_mulai_sewa']): ?><dt>Mulai sewa</dt><dd><?= e(tgl($p['tanggal_mulai_sewa'])) ?></dd><?php endif; ?>
     <?php if ($p['status'] === 'Menunggu DP'): ?><dt>Batas bayar DP</dt><dd><strong style="color:var(--bahaya)"><?= e(tgl($p['batas_bayar_dp'], true)) ?></strong></dd><?php endif; ?>
     <?php if ($p['alasan_batal']): ?><dt>Alasan pembatalan</dt><dd><?= e($p['alasan_batal']) ?></dd><?php endif; ?>
@@ -30,9 +29,9 @@
       <?php foreach ($tagihan as $t): ?>
         <tr>
           <td data-label="Jenis"><?= e($t['jenis']) ?><?= $t['periode_ke'] ? ' #' . (int)$t['periode_ke'] : '' ?></td>
-          <td data-label="Jumlah" class="num"><?= rupiah($t['jumlah']) ?></td>
+          <td data-label="Jumlah" class="num"><?= tampil_total_tagihan($t) ?></td>
           <td data-label="Jatuh tempo"><?= e(tgl($t['jatuh_tempo'], $t['jenis'] === 'DP')) ?></td>
-          <td data-label="Status"><?= badge($t['status']) ?>
+          <td data-label="Status"><?= badge_tagihan($t) ?><?= janji_info($t) ?>
             <?php if ($t['status_bayar'] === 'Ditolak' && $t['status'] === 'Belum Dibayar'): ?><div class="small" style="color:var(--bahaya)">Ditolak: <?= e($t['catatan_bayar']) ?></div><?php endif; ?>
           </td>
           <td><?php if ($t['bisa_unggah']): ?><a class="btn btn-sm" href="/pembayaran/upload/<?= (int)$t['id_tagihan'] ?>">Upload Bukti</a><?php endif; ?></td>

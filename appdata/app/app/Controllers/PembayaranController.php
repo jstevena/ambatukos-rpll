@@ -24,7 +24,7 @@ class PembayaranController extends Controller
         if ($berikutnya !== null) {
             $berikutnya['bisa_unggah'] = $this->svc->bolehUnggah($berikutnya);
         }
-        $this->view('pembayaran/index', ['title' => 'Pembayaran', 'berikutnya' => $berikutnya, 'riwayat' => $riwayat, 'page' => $page]);
+        $this->view('pembayaran/index', ['title' => 'Pembayaran', 'berikutnya' => $berikutnya, 'riwayat' => $riwayat, 'page' => $page, 'menunggak' => $tagihan->menunggak(Auth::id())]);
     }
 
     /** UI-07 Upload Bukti Pembayaran. */
@@ -120,7 +120,10 @@ class PembayaranController extends Controller
     /** UI-10 Penyewa Belum Bayar. */
     public function belumBayar(): void
     {
-        $this->view('pembayaran/belum_bayar', ['title' => 'Penyewa Belum Bayar', 'daftar' => $this->svc->belumBayar()]);
+        $this->view('pembayaran/belum_bayar', [
+            'title' => 'Penyewa Belum Bayar', 'daftar' => $this->svc->belumBayar(),
+            'janji' => (new JanjiBayarService())->menunggu(), 'batasPutus' => PengaturanService::int('batas_putus_hari'),
+        ]);
     }
 
     private function notFound(): never

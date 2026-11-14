@@ -7,6 +7,8 @@ $rows = $d['rows'];
   <div><h1>Daftar Kamar</h1><p class="muted" style="margin:0"><?= (int)$d['total'] ?> kamar<?= $cur !== '' ? ' berstatus ' . e($cur) : '' ?></p></div>
 </div>
 
+<?php include BASE_PATH . '/app/views/kamar/_fasilitas_umum.php'; ?>
+
 <div class="filter">
   <?php foreach (['' => 'Semua', 'Tersedia' => 'Tersedia', 'Dipesan' => 'Dipesan', 'Terisi' => 'Terisi'] as $v => $label): ?>
     <a class="<?= $cur === $v ? 'active' : '' ?>" href="/kamar<?= $v !== '' ? '?status=' . urlencode($v) : '' ?>"><?= e($label) ?></a>
@@ -33,7 +35,6 @@ $rows = $d['rows'];
             <?php foreach (array_slice($fas, 0, 4) as $f): ?><span class="chip"><?= e($f) ?></span><?php endforeach; ?>
             <?php if (count($fas) > 4): ?><span class="chip">+<?= count($fas) - 4 ?></span><?php endif; ?>
           </div>
-          <small>Sewa <?= e($k['jenis_sewa']) ?></small>
           <div class="btn-row">
             <a class="btn btn-outline btn-sm" href="/kamar/<?= (int)$k['id_kamar'] ?>">Detail</a>
             <?php if (!in_array($role, ['admin', 'pemilik'], true)): ?>
