@@ -88,7 +88,7 @@ function menu_for(?string $role): array
     return match ($role) {
         'penyewa' => [
             ['Beranda', '/beranda'], ['Kamar', '/kamar'], ['Pemesanan Saya', '/pemesanan'],
-            ['Pembayaran', '/pembayaran'], ['Keluhan', '/keluhan'], ['Notifikasi', '/notifikasi'],
+            ['Pembayaran', '/pembayaran'], ['Keluhan', '/keluhan'],
         ],
         'admin' => [
             ['Dashboard', '/dashboard'], ['Data Kamar', '/admin/kamar'], ['Verifikasi Pembayaran', '/admin/verifikasi'],
