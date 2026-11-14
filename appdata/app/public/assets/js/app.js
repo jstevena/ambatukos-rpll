@@ -116,9 +116,8 @@
   stHp.textContent = '.hint.ok{color:var(--ok)}.hint.bad{color:var(--danger)}';
   document.head.appendChild(stHp);
   document.querySelectorAll('input[data-hp]').forEach(function (inp) {
-    var hint = inp.parentNode.querySelector('.hint');
-    if (!hint) return;
-    var DEF = hint.textContent;
+    var hint = inp.parentNode ? inp.parentNode.querySelector('.hint') : null;
+    var DEF = hint ? hint.textContent : '';
     function normal(v) {
       var s = v.replace(/[\s().-]/g, '');
       if (s === '') return '';
@@ -127,9 +126,38 @@
       if (s.charAt(0) === '0') return '+62' + s.slice(1);
       return null;
     }
+    function batasiDigit(v) {
+      var clean = '';
+      for (var j = 0; j < v.length; j++) {
+        var ch = v.charAt(j);
+        if (ch === '+' && j === 0) clean += ch;
+        else if (/[\d\s().-]/.test(ch)) clean += ch;
+      }
+      var isPlusOr62 = clean.charAt(0) === '+' || clean.indexOf('62') === 0;
+      var max = isPlusOr62 ? 14 : 13;
+      var count = 0;
+      var res = '';
+      for (var i = 0; i < clean.length; i++) {
+        var c = clean.charAt(i);
+        if (/\d/.test(c)) {
+          if (count >= max) continue;
+          count++;
+        }
+        res += c;
+      }
+      return res;
+    }
     function cek() {
-      inp.value = inp.value.replace(/[^\d+\s().-]/g, '');          // hanya angka dan pemisah
+      var limited = batasiDigit(inp.value);
+      if (inp.value !== limited) {
+        inp.value = limited;
+      }
+      var isPlusOr62 = inp.value.charAt(0) === '+' || inp.value.indexOf('62') === 0;
+      var hasSep = /[\s().-]/.test(inp.value);
+      inp.maxLength = inp.value === '' ? 16 : (isPlusOr62 ? 16 : (hasSep ? 16 : 13));
+
       var n = normal(inp.value);
+      if (!hint) return;
       if (n === '') { hint.className = 'hint'; hint.textContent = DEF; inp.setCustomValidity(''); return; }
       var ok = n !== null && /^\+628\d{7,11}$/.test(n);
       var msg;

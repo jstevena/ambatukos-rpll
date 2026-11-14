@@ -31,7 +31,7 @@
       </div>
       <div class="field">
         <label for="no_hp">Nomor HP <small class="req-penyewa">(wajib untuk penyewa)</small></label>
-        <input type="text" data-hp id="no_hp" name="no_hp" inputmode="tel" maxlength="20" value="<?= e(old('no_hp')) ?>">
+        <input type="text" data-hp id="no_hp" name="no_hp" inputmode="tel" maxlength="16" value="<?= e(old('no_hp')) ?>">
         <div class="hint">Boleh diawali 08 atau +62, 9-13 digit (format 08xx). Disimpan sebagai +62.</div>
       </div>
     </div>

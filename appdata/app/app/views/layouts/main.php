@@ -109,6 +109,6 @@ $inisial = $user ? mb_strtoupper(mb_substr($user['nama'], 0, 1)) : '';
   <?php endforeach; ?>
   <?= $content ?>
 </main>
-<script src="/assets/js/app.js?v=3"></script>
+<script src="/assets/js/app.js?v=4"></script>
 </body>
 </html>
